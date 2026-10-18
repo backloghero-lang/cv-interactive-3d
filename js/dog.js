@@ -3,7 +3,7 @@ import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.j
 import { mat, ease } from "./util.js";
 
 function part(w, h, d, material, parent, x, y, z, r){
-  const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 2, Math.min(r == null ? 0.025 : r, w / 2, h / 2, d / 2)), material);
+  const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 4, Math.min((r == null ? 0.03 : r) * 1.7, w / 2 - 0.0005, h / 2 - 0.0005, d / 2 - 0.0005))   /* oble ksztalty */, material);
   m.position.set(x || 0, y || 0, z || 0); m.castShadow = true; m.receiveShadow = true;
   parent.add(m); return m;
 }
@@ -43,9 +43,37 @@ export function buildDog(scene, P, character){
     legs.push(l);
   });
 
+  // ---------- poza snu "w rogala": cialo wygiete w luk, glowa polozona przy ogonie ----------
+  const curl = pivot(root, 0, 0, 0); curl.visible = false;
+  const R0 = 0.12, ARC = Math.PI * 1.55;
+  function arcPoint(th, y){ return new THREE.Vector3(R0 * Math.cos(th), y, -R0 * Math.sin(th)); }
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(R0, 0.072, 18, 48, ARC), tan);
+  ring.rotation.x = -Math.PI / 2; ring.position.y = 0.075; ring.scale.set(1, 1, 0.9); ring.castShadow = true; curl.add(ring);
+  const saddle = new THREE.Mesh(new THREE.TorusGeometry(R0 + 0.012, 0.06, 14, 40, ARC * 0.62), black);
+  saddle.rotation.x = -Math.PI / 2; saddle.rotation.z = ARC * 0.18; saddle.position.y = 0.1; saddle.castShadow = true; curl.add(saddle);
+  const belly = new THREE.Mesh(new THREE.TorusGeometry(R0 - 0.03, 0.045, 12, 40, ARC * 0.9), white);
+  belly.rotation.x = -Math.PI / 2; belly.position.y = 0.05; curl.add(belly);
+  // glowa na koncu luku, oparta przy ogonie
+  const ch = pivot(curl, 0, 0, 0);
+  const hp = arcPoint(ARC + 0.25, 0.1); ch.position.copy(hp); ch.rotation.y = ARC + 0.25 + Math.PI;   // kufa w strone srodka/ogona
+  part(0.14, 0.12, 0.15, tan, ch, 0, 0, 0, 0.05);
+  part(0.06, 0.1, 0.12, white, ch, 0, 0.0, 0.02, 0.02);
+  part(0.09, 0.07, 0.09, white, ch, 0, -0.025, 0.09, 0.03);
+  part(0.04, 0.03, 0.03, nose, ch, 0, -0.005, 0.135, 0.01);
+  [-0.04, 0.04].forEach(function(x){ part(0.03, 0.006, 0.01, nose, ch, x, 0.02, 0.072, 0.003); });     // zamkniete oczy
+  [-1, 1].forEach(function(s){ const e = part(0.025, 0.13, 0.08, ear, ch, s * 0.075, -0.03, -0.01, 0.012); e.rotation.z = s * 0.5; });
+  // ogon owiniety do przodu z biala koncowka, obok glowy
+  const tp = arcPoint(-0.05, 0.06), tg = pivot(curl, tp.x, tp.y, tp.z);
+  tg.rotation.y = -Math.PI / 2 + 0.5;
+  part(0.035, 0.035, 0.16, tan, tg, 0, 0, 0.07, 0.015);
+  part(0.04, 0.04, 0.05, white, tg, 0, 0, 0.16, 0.018);
+  // lapki wystajace spod ciala
+  [0.3, 0.55].forEach(function(th){ const p = arcPoint(ARC * th, 0.03), q = p.clone().multiplyScalar(1.55); part(0.05, 0.04, 0.08, white, curl, q.x, 0.025, q.z, 0.015); });
+
   // ---------- trasa ----------
-  const sofaFront = new THREE.Vector3(1.45, 0, 0.32), mid = new THREE.Vector3(0.25, 0, 0.3);
-  const bowlStand = new THREE.Vector3(P.bowl.x + 0.32, 0, P.bowl.z), owner = P.owner.clone();
+  // trasa: kanapa -> miska pod kwiatkiem przy scianie -> do pana -> z powrotem na kanape (spi zwiniety w rogala)
+  const sofaFront = new THREE.Vector3(1.45, 0, 0.3), mid = new THREE.Vector3(0.45, 0, 0.15);
+  const bowlStand = new THREE.Vector3(P.bowl.x, 0, P.bowl.z + 0.42), owner = P.owner.clone();
   const steps = [
     { s: "sleep", d: 14 },
     { s: "stand", d: 1.2 },
@@ -56,6 +84,7 @@ export function buildDog(scene, P, character){
     { s: "beg", d: 5, face: new THREE.Vector3(P.owner.x - 0.6, 0, P.owner.z - 0.6) },
     { s: "walk", to: mid }, { s: "walk", to: sofaFront },
     { s: "jump", from: sofaFront, to: P.sofa, d: 0.7 },
+    { s: "turn", d: 1.2 },
     { s: "lie", d: 1.4 }
   ];
   let i = 0, tt = 0, from = P.sofa.clone(), heading = -Math.PI / 2, gait = 0;
@@ -74,20 +103,26 @@ export function buildDog(scene, P, character){
   }
   return {
     root: root,
+    get state(){ return steps[i].s + "#" + i; },
     update: function(dt, t){
       const st = steps[i];
       tt += dt;
       let done = false, moving = false;
       const breathe = Math.sin(t * 2.2) * 0.02;
       body.scale.set(1 + breathe * 0.5, 1 + breathe, 1);
-      if(st.s === "sleep" || st.s === "lie"){
-        pose(true, false);
-        neck.rotation.x = 0.5; head.rotation.y = 0.25;
-        eyes.forEach(function(e){ e.scale.y = 0.2; });
-        tail.rotation.x = -1.4;
+      const curled = st.s === "sleep" || st.s === "lie";
+      body.visible = !curled; curl.visible = curled;
+      if(curled){
+        // spanie "w rogala" - osobny, zwiniety model; przy kladzeniu sie plynnie "wrasta" w kocyk
+        const k = st.s === "lie" ? Math.min(1, tt / st.d) : 1;
+        curl.scale.set(1 + breathe * 0.8, (0.6 + 0.4 * k) * (1 + breathe), 1 + breathe * 0.8);
         done = tt > st.d;
       } else {
         eyes.forEach(function(e){ e.scale.y = (Math.floor(t * 7) % 29) === 0 ? 0.2 : 1; });
+      }
+      if(st.s === "turn"){   // krecenie sie w kolko przed polozeniem
+        pose(false, false); root.rotation.y += dt * 5.2; moving = true;
+        done = tt > st.d;
       }
       if(st.s === "stand"){ pose(false, false); neck.rotation.x = 0; head.rotation.y = Math.sin(t * 2) * 0.3; done = tt > st.d; }
       if(st.s === "jump"){

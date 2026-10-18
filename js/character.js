@@ -4,7 +4,7 @@ import { C, mat, canvasTexture } from "./util.js";
 
 // element wysrodkowany w punkcie (x,y,z) wzgledem rodzica
 function part(w, h, d, material, parent, x, y, z, r){
-  const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 2, Math.min(r == null ? 0.03 : r, w / 2, h / 2, d / 2)), material);
+  const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 4, Math.min((r == null ? 0.03 : r) * 1.7, w / 2 - 0.0005, h / 2 - 0.0005, d / 2 - 0.0005))   /* oble ksztalty */, material);
   m.position.set(x || 0, y || 0, z || 0); m.castShadow = true; m.receiveShadow = true;
   parent.add(m); return m;
 }

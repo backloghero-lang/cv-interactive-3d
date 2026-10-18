@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { C, mat, glow, rbox, box, cyl, sphere, group, canvasTexture, screenMesh, roundRect } from "./util.js";
+import { C, mat, glow, rbox, box, cyl, sphere, capsule, group, canvasTexture, screenMesh, roundRect } from "./util.js";
 import * as S from "./screens.js";
 
 // Uklad pokoju (metry): podloga 6x6 w (0,0,0); sciana tylna z = -3, sciana lewa x = -3.
@@ -10,7 +10,8 @@ export function buildRoom(scene, opts){
   const room = group(scene);
 
   // ---------- podstawa, podloga, sciany ----------
-  rbox(6.5, 0.32, 6.5, mat(C.base), 0.04, -0.1, -0.32, -0.1, room);
+  // podstawa ponizej podlogi (wspolna plaszczyzna y=0 dawala migoczace czarne pasy)
+  rbox(6.5, 0.32, 6.5, mat(C.base), 0.04, -0.1, -0.42, -0.1, room);
   const floorTex = canvasTexture(512, 512, function(ctx, w, h){
     for(let i = 0; i < 8; i++){
       ctx.fillStyle = i % 2 ? "#6e4b36" : "#674632"; ctx.fillRect(0, i * 64, w, 64);
@@ -19,7 +20,7 @@ export function buildRoom(scene, opts){
     }
   }).tex;
   floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(2, 2);
-  const floor = box(6, 0.06, 6, new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.75 }), 0, -0.06, 0, room);
+  const floor = box(6, 0.1, 6, new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.75 }), 0, -0.1, 0, room);
   floor.castShadow = false;
 
   const wallM = mat(C.wall), wallM2 = mat(C.wallDark);
@@ -143,19 +144,26 @@ export function buildRoom(scene, opts){
   });
   R.anim.push(function(dt){ fans.forEach(function(f){ f.rotation.z += dt * 9; }); });
 
-  // ---------- fotel gamingowy ----------
+  // ---------- fotel gamingowy (miekki, oble ksztalty) ----------
   const chair = group(room, -1.95, 0, -0.72);
   chair.rotation.y = -Math.PI / 2;    // oparcie od strony +x (postac patrzy w -x)
-  cyl(0.05, 0.05, 0.38, mat(C.metal), 0, 0.06, 0, chair, 10);
-  for(let i = 0; i < 5; i++){ const leg = rbox(0.04, 0.03, 0.3, mat(C.black), 0.01, Math.sin(i * 1.2566) * 0.14, 0.04, Math.cos(i * 1.2566) * 0.14, chair); leg.rotation.y = i * 1.2566; }
-  rbox(0.52, 0.1, 0.5, mat(C.black), 0.04, 0, 0.44, 0, chair);
-  const back = rbox(0.5, 0.78, 0.1, mat(C.black), 0.05, 0, 0.52, 0.24, chair);
-  back.rotation.x = -0.12;
+  cyl(0.035, 0.045, 0.36, mat(C.metal, { metalness: 0.6, roughness: 0.35 }), 0, 0.07, 0, chair);
+  for(let i = 0; i < 5; i++){
+    const a = i * 1.2566, leg = capsule(0.022, 0.24, mat(C.black), Math.sin(a) * 0.14, 0.06, Math.cos(a) * 0.14, chair, false);
+    leg.rotation.set(Math.PI / 2, 0, 0); leg.rotation.y = a; leg.rotation.order = "YXZ";
+    sphere(0.03, mat(0x33343f), Math.sin(a) * 0.27, 0.03, Math.cos(a) * 0.27, chair, 16);
+  }
+  rbox(0.54, 0.12, 0.52, mat(C.black), 0.05, 0, 0.42, 0, chair);
+  const backG = group(chair, 0, 0.5, 0.25); backG.rotation.x = -0.14;
+  rbox(0.52, 0.82, 0.13, mat(C.black), 0.055, 0, 0, 0, backG);
+  // boczne "skrzydla" oparcia i poduszka pod glowe
+  rbox(0.1, 0.62, 0.16, mat(C.black), 0.045, -0.25, 0.06, -0.02, backG).rotation.z = 0.08;
+  rbox(0.1, 0.62, 0.16, mat(C.black), 0.045, 0.25, 0.06, -0.02, backG).rotation.z = -0.08;
+  rbox(0.3, 0.12, 0.08, mat(C.purple), 0.05, 0, 0.66, -0.08, backG);
   const stripeM = mat(C.purple, { emissive: C.purple, emissiveIntensity: 0.35 });
-  rbox(0.08, 0.7, 0.11, stripeM, 0.03, -0.14, 0.56, 0.23, chair).rotation.x = -0.12;
-  rbox(0.08, 0.7, 0.11, stripeM, 0.03, 0.14, 0.56, 0.23, chair).rotation.x = -0.12;
-  rbox(0.07, 0.04, 0.34, mat(C.black), 0.01, -0.28, 0.66, -0.02, chair);
-  rbox(0.07, 0.04, 0.34, mat(C.black), 0.01, 0.28, 0.66, -0.02, chair);
+  rbox(0.07, 0.6, 0.02, stripeM, 0.01, -0.13, 0.1, -0.07, backG);
+  rbox(0.07, 0.6, 0.02, stripeM, 0.01, 0.13, 0.1, -0.07, backG);
+  [-0.3, 0.3].forEach(function(x){ capsule(0.035, 0.26, mat(C.black), x, 0.69, -0.02, chair, false).rotation.x = Math.PI / 2; cyl(0.018, 0.018, 0.2, mat(C.black), x, 0.48, 0.02, chair); });
   R.seat = { x: -1.95, y: 0.54, z: -0.72 };
 
   // ---------- neon nad biurkiem ----------
@@ -234,11 +242,6 @@ export function buildRoom(scene, opts){
     const gm = glow([0xc98a3a, 0x2fbf71, 0x8b6bff][i], 2); R.glowMats.push(gm);
     box(0.17, 0.012, 0.012, gm, 0, 0.012, 0.022, g);
   });
-  // pad
-  const pad = group(media, 0.75, 0.48, 0.08);
-  rbox(0.2, 0.04, 0.12, mat(C.black), 0.02, 0, 0, 0, pad);
-  sphere(0.02, glow(C.purple, 2), -0.05, 0.045, 0, pad); sphere(0.02, glow(C.cyan, 2), 0.05, 0.045, 0, pad);
-  R.anchors.tv = new THREE.Vector3(1.8, 2.45, -2.85);
   R.anchors.console = new THREE.Vector3(1.6, 1.05, -2.6);
 
   // ---------- sciana zdjec firm (lewa sciana, przod) ----------
@@ -251,7 +254,7 @@ export function buildRoom(scene, opts){
     const g = group(room, -2.98, pp[0], pp[1]);
     g.rotation.y = Math.PI / 2;
     rbox(w + 0.06, h + 0.06, 0.04, mat(i === 0 ? C.white : C.black), 0.01, 0, -(h + 0.06) / 2, 0, g);
-    const m = screenMesh(w, h, S.companyPhoto(p[0], p[1], p[2], p[3]), false);
+    const m = screenMesh(w, h, S.companyPhoto(p[0], p[1], p[2]), false);
     m.position.set(0, 0, 0.022); g.add(m);
   });
   // lampki choinkowe nad zdjeciami
@@ -265,18 +268,35 @@ export function buildRoom(scene, opts){
   R.anchors.wall = new THREE.Vector3(-2.85, 2.6, 1.65);
 
   // ---------- sofa ----------
+  // sofa z miekkimi, pufiastymi poduchami
   const sofa = group(room, 1.4, 0, 1.05);
-  rbox(1.9, 0.26, 0.82, mat(C.sofaDark), 0.06, 0, 0.08, 0, sofa);
-  rbox(1.7, 0.14, 0.66, mat(C.sofa), 0.06, 0, 0.32, -0.05, sofa);
-  rbox(1.9, 0.42, 0.2, mat(C.sofa), 0.08, 0, 0.32, 0.32, sofa);
-  rbox(0.2, 0.34, 0.82, mat(C.sofa), 0.08, -0.85, 0.32, 0, sofa);
-  rbox(0.2, 0.34, 0.82, mat(C.sofa), 0.08, 0.85, 0.32, 0, sofa);
-  [[-0.85, -0.35], [0.85, -0.35], [-0.85, 0.35], [0.85, 0.35]].forEach(function(p){ cyl(0.03, 0.02, 0.08, mat(C.black), p[0], 0, p[1], sofa); });
-  rbox(0.36, 0.3, 0.12, mat(C.purple), 0.06, -0.55, 0.42, 0.2, sofa).rotation.z = 0.15;
-  rbox(0.34, 0.28, 0.12, mat(C.cyan), 0.06, 0.6, 0.42, 0.2, sofa).rotation.z = -0.12;
+  rbox(1.92, 0.22, 0.86, mat(C.sofaDark), 0.06, 0, 0.07, 0, sofa);
+  [-0.42, 0.42].forEach(function(x){
+    rbox(0.82, 0.17, 0.62, mat(C.sofa), 0.07, x, 0.27, -0.06, sofa);                 // siedziska
+    rbox(0.82, 0.44, 0.22, mat(C.sofa), 0.09, x, 0.3, 0.3, sofa).rotation.x = 0.14;  // oparcia
+  });
+  [-0.87, 0.87].forEach(function(x){ rbox(0.2, 0.42, 0.86, mat(C.sofaDark), 0.085, x, 0.07, 0, sofa); });  // podlokietniki
+  [[-0.8, -0.34], [0.8, -0.34], [-0.8, 0.34], [0.8, 0.34]].forEach(function(p){ cyl(0.028, 0.02, 0.07, mat(C.woodDark), p[0], 0, p[1], sofa); });
+  rbox(0.36, 0.32, 0.13, mat(C.purple), 0.07, -0.55, 0.42, 0.18, sofa).rotation.set(-0.2, 0, 0.18);
+  rbox(0.34, 0.3, 0.13, mat(C.cyan), 0.07, 0.6, 0.42, 0.18, sofa).rotation.set(-0.2, 0, -0.14);
   // kocyk psa na sofie
-  rbox(0.62, 0.03, 0.46, mat(0xd9c3a5), 0.015, 0.15, 0.46, -0.08, sofa);
-  R.dog.sofa = new THREE.Vector3(1.55, 0.49, 0.97);
+  rbox(0.66, 0.03, 0.5, mat(0xd9c3a5), 0.015, 0.12, 0.44, -0.08, sofa);
+  R.dog.sofa = new THREE.Vector3(1.52, 0.47, 0.97);
+
+  // stolik kawowy z padem i glosnikiem (jak w salonie gracza)
+  const table = group(room, 1.3, 0, -0.55);
+  rbox(1.0, 0.07, 0.56, mat(C.cream), 0.03, 0, 0.36, 0, table);
+  rbox(0.92, 0.2, 0.48, mat(C.wood), 0.04, 0, 0.12, 0, table);
+  rbox(0.92, 0.04, 0.48, mat(C.cream), 0.02, 0, 0.06, 0, table);
+  [[-0.43, -0.22], [0.43, -0.22], [-0.43, 0.22], [0.43, 0.22]].forEach(function(p){ cyl(0.022, 0.022, 0.06, mat(C.black), p[0], 0, p[1], table); });
+  const pad = group(table, 0.15, 0.43, 0.05); pad.rotation.y = 0.4;
+  rbox(0.2, 0.04, 0.11, mat(C.black), 0.02, 0, 0, 0, pad);
+  [-0.085, 0.085].forEach(function(x){ capsule(0.032, 0.03, mat(C.black), x, 0.01, 0.05, pad, false).rotation.x = Math.PI / 2; });
+  sphere(0.016, glow(C.purple, 2), -0.05, 0.045, 0, pad, 12); sphere(0.016, glow(C.cyan, 2), 0.05, 0.045, 0, pad, 12);
+  cyl(0.05, 0.055, 0.09, mat(0x3a3e58), -0.3, 0.43, -0.08, table);
+  sphere(0.045, mat(0x3a3e58), -0.3, 0.52, -0.08, table, 20);
+  const spkM = glow(C.cyan, 1.6); R.glowMats.push(spkM);
+  const spkRing = new THREE.Mesh(new THREE.TorusGeometry(0.048, 0.006, 8, 32), spkM); spkRing.rotation.x = Math.PI / 2; spkRing.position.set(-0.3, 0.435, -0.08); table.add(spkRing);
 
   // ---------- barek + cyfrowa ramka (hobby) ----------
   const cart = group(room, 2.6, 0, -1.45);
@@ -300,12 +320,18 @@ export function buildRoom(scene, opts){
   R.screens.frame = frameScr;
   R.anchors.hobby = new THREE.Vector3(2.6, 1.55, -1.45);
 
-  // ---------- miska psa ----------
-  const bowl = group(room, -1.15, 0, 1.0);
-  cyl(0.13, 0.1, 0.06, mat(0xe85d4a), 0, 0, 0, bowl);
-  cyl(0.1, 0.1, 0.01, mat(0x7a4a2a), 0, 0.05, 0, bowl);
-  rbox(0.46, 0.006, 0.3, mat(0xd9cfc1), 0.003, 0.05, 0, 0.0, bowl);
-  R.dog.bowl = new THREE.Vector3(-1.15, 0, 1.0);
+  // ---------- miska psa: pod kwiatkiem przy tylnej scianie ----------
+  const bowl = group(room, -0.02, 0, -2.66);
+  rbox(0.5, 0.012, 0.3, mat(0xd9cfc1), 0.005, 0.06, 0, 0.02, bowl);
+  const bowlM = mat(0xe85d4a);
+  const bowlMesh = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.035, 16, 40), bowlM);
+  bowlMesh.rotation.x = Math.PI / 2; bowlMesh.position.set(-0.05, 0.045, 0); bowlMesh.castShadow = true; bowl.add(bowlMesh);
+  cyl(0.1, 0.09, 0.03, bowlM, -0.05, 0.012, 0, bowl);
+  cyl(0.085, 0.085, 0.01, mat(0x7a4a2a), -0.05, 0.04, 0, bowl);
+  // druga miseczka z woda
+  const bowl2 = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.026, 14, 32), mat(0x3f86c6)); bowl2.rotation.x = Math.PI / 2; bowl2.position.set(0.17, 0.034, 0.02); bowl2.castShadow = true; bowl.add(bowl2);
+  cyl(0.06, 0.06, 0.008, mat(0x9fd8ff, { roughness: 0.1 }), 0.17, 0.03, 0.02, bowl);
+  R.dog.bowl = new THREE.Vector3(-0.07, 0, -2.66);
   R.dog.owner = new THREE.Vector3(-1.5, 0, -0.2);
 
   // ---------- rosliny ----------
@@ -325,7 +351,7 @@ export function buildRoom(scene, opts){
     R.anim.push(function(dt, t){ leaves.forEach(function(l, i){ l.rotation.z = Math.sin(t * 0.8 + i) * 0.05; }); });
   }
   monstera(room, -2.55, 2.55, 1.1);
-  monstera(room, 0.35, -2.6, 0.8);
+  monstera(room, 0.56, -2.62, 0.85);   // pod nia miska psa
   // wiszaca roslina na polce nad TV
   rbox(0.9, 0.04, 0.2, mat(C.woodDark), 0.01, 1.8, 2.42, -2.9, room);
   cyl(0.09, 0.07, 0.14, mat(C.pot), 1.45, 2.46, -2.88, room);

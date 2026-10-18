@@ -9,6 +9,7 @@ import { buildCharacter } from "./character.js";
 import { buildDog } from "./dog.js";
 import { createAudio } from "./audio.js";
 import { TEXT, PROFILE } from "./content.js";
+import { LOGOS } from "./screens.js";
 import { ease, lerp } from "./util.js";
 
 const $ = function(id){ return document.getElementById(id); };
@@ -59,7 +60,8 @@ const VIEWS = {
   board:   { pos: [-0.5, 1.8, 0.45], target: [-0.5, 1.75, -2.95] },
   hobby:   { pos: [1.0, 1.45, -0.35], target: [2.6, 0.95, -1.5] }
 };
-const ORDER = ["desk", "wall", "tv", "board", "console", "shelf", "hobby"];
+// TV nie ma punktu interakcji - tylko wyswietla notowania
+const ORDER = ["desk", "wall", "board", "console", "shelf", "hobby"];
 let R, hero, dog, pins = {}, focused = null, flight = null, savedHome = null, far = 1;
 const audio = createAudio();
 
@@ -126,7 +128,8 @@ function panelHtml(key){
   if(key === "wall"){
     h += '<ol class="timeline">';
     p.jobs.forEach(function(j){
-      h += "<li><div class='tl-head'><b>" + esc(j.co) + "</b><span>" + esc(j.years) + "</span></div><p class='role'>" + esc(j.role) + "</p><ul>" +
+      const logo = j.logo && LOGOS[j.logo] ? '<span class="tl-logo" style="background:' + LOGOS[j.logo].bg + '"><img src="' + esc(LOGOS[j.logo].src) + '" alt="' + esc(j.co) + '"></span>' : "";
+      h += "<li>" + logo + "<div class='tl-head'><b>" + esc(j.co) + "</b><span>" + esc(j.years) + "</span></div><p class='role'>" + esc(j.role) + "</p><ul>" +
         j.points.map(function(x){ return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></li>";
     });
     h += "</ol>";
@@ -263,7 +266,7 @@ function loop(){
   composer.render();
 }
 // podglad do testow: przewiniecie animacji o zadany czas (karta w tle nie dostaje klatek)
-window.__room = { camera: camera, controls: controls, advance: function(sec){ for(let s = 0; s < sec; s += 1 / 30) frame(1 / 30); composer.render(); } };
+window.__room = { camera: camera, controls: controls, get dog(){ return dog; }, advance: function(sec){ for(let s = 0; s < sec; s += 1 / 30) frame(1 / 30); composer.render(); } };
 // gdy panel jest otwarty, przesuwamy srodek kadru tak, by obiekt byl na widocznej czesci ekranu
 let offX = 0, offY = 0;
 function updateViewOffset(dt){

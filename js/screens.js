@@ -242,38 +242,34 @@ export function tvScreen(getLang){
 }
 
 // ---------- zdjecia firm na scianie ----------
-const ICONS = {
-  comarch: function(ctx, w, h){ // biurowiec
-    ctx.fillStyle = "#2b9be8"; ctx.fillRect(w * 0.3, h * 0.25, w * 0.4, h * 0.45);
-    ctx.fillStyle = "#cfe8ff"; for(let r = 0; r < 5; r++) for(let c = 0; c < 3; c++) ctx.fillRect(w * 0.34 + c * w * 0.11, h * 0.29 + r * h * 0.08, w * 0.07, h * 0.05);
-  },
-  aldi: function(ctx, w, h){ // koszyk
-    ctx.strokeStyle = "#ffd23f"; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(w * 0.22, h * 0.3); ctx.lineTo(w * 0.32, h * 0.3); ctx.lineTo(w * 0.4, h * 0.58); ctx.lineTo(w * 0.74, h * 0.58); ctx.lineTo(w * 0.8, h * 0.38); ctx.lineTo(w * 0.36, h * 0.38); ctx.stroke();
-    ctx.fillStyle = "#ffd23f"; ctx.beginPath(); ctx.arc(w * 0.44, h * 0.66, 9, 0, 7); ctx.arc(w * 0.7, h * 0.66, 9, 0, 7); ctx.fill();
-  },
-  specjal: function(ctx, w, h){ // ciezarowka
-    ctx.fillStyle = "#e85d4a"; ctx.fillRect(w * 0.18, h * 0.36, w * 0.42, h * 0.24); ctx.fillRect(w * 0.6, h * 0.44, w * 0.2, h * 0.16);
-    ctx.fillStyle = "#cfe8ff"; ctx.fillRect(w * 0.64, h * 0.47, w * 0.1, h * 0.06);
-    ctx.fillStyle = "#222"; ctx.beginPath(); ctx.arc(w * 0.3, h * 0.63, 11, 0, 7); ctx.arc(w * 0.7, h * 0.63, 11, 0, 7); ctx.fill();
-  },
-  komfort: function(ctx, w, h){ // sofa
-    ctx.fillStyle = "#8d6be8"; roundRect(ctx, w * 0.2, h * 0.36, w * 0.6, h * 0.14, 10); ctx.fill();
-    roundRect(ctx, w * 0.16, h * 0.46, w * 0.68, h * 0.14, 10); ctx.fill();
-    ctx.fillStyle = "#5a3fa8"; ctx.fillRect(w * 0.22, h * 0.6, 8, 14); ctx.fillRect(w * 0.76, h * 0.6, 8, 14);
-  },
-  auchan: function(ctx, w, h){ // torba zakupowa
-    ctx.fillStyle = "#3fb56b"; ctx.beginPath(); ctx.moveTo(w * 0.3, h * 0.36); ctx.lineTo(w * 0.7, h * 0.36); ctx.lineTo(w * 0.74, h * 0.66); ctx.lineTo(w * 0.26, h * 0.66); ctx.fill();
-    ctx.strokeStyle = "#3fb56b"; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(w * 0.5, h * 0.36, w * 0.12, Math.PI, 0); ctx.stroke();
-  }
+// ramka z prawdziwym logo firmy (assets/logos) i latami pracy; logo wczytywane asynchronicznie
+export const LOGOS = {
+  comarch: { src: "assets/logos/comarch.png", bg: "#ffffff" },
+  aldi: { src: "assets/logos/aldi.png", bg: "#ffffff" },
+  specjal: { src: "assets/logos/specjal.png", bg: "#ffffff" },
+  komfort: { src: "assets/logos/komfort.svg", bg: "#c8102e" },   // logo Komfort jest biale - na firmowej czerwieni
+  auchan: { src: "assets/logos/auchan.png", bg: "#ffffff" }
 };
-export function companyPhoto(key, name, years, bg){
-  return canvasTexture(320, 400, function(ctx, w, h){
-    ctx.fillStyle = grad(ctx, 0, 0, 0, h, [[0, bg[0]], [1, bg[1]]]); ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = "rgba(255,255,255,.08)"; ctx.beginPath(); ctx.arc(w * 0.5, h * 0.45, w * 0.36, 0, 7); ctx.fill();
-    ICONS[key](ctx, w, h);
-    ctx.fillStyle = "#ffffff"; ctx.textAlign = "center"; ctx.font = "800 30px " + FONT; ctx.fillText(name, w / 2, h * 0.84);
-    ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.font = "600 20px " + FONT; ctx.fillText(years, w / 2, h * 0.92);
-  }).tex;
+export function companyPhoto(key, name, years){
+  const L = LOGOS[key], W = 400, H = 500;
+  const s = canvasTexture(W, H);
+  function draw(img){
+    const ctx = s.ctx;
+    ctx.fillStyle = L.bg; ctx.fillRect(0, 0, W, H);
+    if(img){
+      const maxW = W * 0.78, maxH = H * 0.52, k = Math.min(maxW / img.width, maxH / img.height);
+      const iw = img.width * k, ih = img.height * k;
+      ctx.drawImage(img, (W - iw) / 2, H * 0.4 - ih / 2, iw, ih);
+    } else { ctx.fillStyle = "#1b1d2e"; ctx.textAlign = "center"; ctx.font = "800 40px " + FONT; ctx.fillText(name, W / 2, H * 0.42); }
+    ctx.fillStyle = "#1f2240"; ctx.fillRect(0, H * 0.8, W, H * 0.2);
+    ctx.fillStyle = "#ffffff"; ctx.textAlign = "center"; ctx.font = "700 34px " + FONT; ctx.fillText(years, W / 2, H * 0.915);
+    s.tex.needsUpdate = true;
+  }
+  draw(null);
+  const img = new Image();
+  img.onload = function(){ draw(img); };
+  img.src = L.src;
+  return s.tex;
 }
 
 // ---------- certyfikat w ramce ----------
@@ -297,11 +293,11 @@ export function skillsBoard(){
     ctx.fillStyle = "#b98a5a"; ctx.fillRect(0, 0, w, h);
     for(let i = 0; i < 2600; i++){ ctx.fillStyle = "rgba(90,55,25," + (Math.random() * 0.25) + ")"; ctx.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
     const notes = [["Analiza\nwymagań", "#ffe46b"], ["BPMN\nUML", "#7df0c8"], ["SQL\nT-SQL", "#8fc8ff"], ["REST API\nJSON · XML", "#ffb3d1"], ["UI / UX\nmobile", "#c9a6ff"],
-                   ["Comarch\nERP", "#ffe46b"], ["AI\nagenci", "#7df0c8"], ["Jira\nScrum", "#ffb3d1"], ["Testy\nprojektanckie", "#8fc8ff"]];
+                   ["Comarch\nERP", "#ffe46b"], ["AI\nagenci", "#7df0c8"], ["Jira\nScrum", "#ffb3d1"], ["Testy\nprojektanckie", "#8fc8ff"], ["Automaty-\nzacja", "#c9a6ff"]];
     const pos = [];
     notes.forEach(function(n, i){
       const col = i % 5, row = Math.floor(i / 5);
-      const x = 40 + col * 170 + (row ? 85 : 0), y = 40 + row * 250 + (col % 2) * 20, rot = (Math.sin(i * 3.3) * 0.07);
+      const x = 30 + col * 170, y = 40 + row * 250 + (col % 2) * 20, rot = (Math.sin(i * 3.3) * 0.07);
       pos.push([x + 70, y + 12]);
       ctx.save(); ctx.translate(x + 70, y + 70); ctx.rotate(rot);
       ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.fillRect(-64, -60, 140, 140);
@@ -367,19 +363,30 @@ export function photoFrame(){
 }
 
 // ---------- napis neon ----------
+// Neon jak swiecaca rurka: szeroka kolorowa poswiata + kolorowy obrys + jasny rdzen.
+// Tekst jest skalowany do szerokosci plotna z marginesem, wiec nic nie jest uciete.
 export function neonText(text){
-  return canvasTexture(1024, 200, function(ctx, w, h){
+  const s = canvasTexture(2048, 400, function(ctx, w, h){
     ctx.clearRect(0, 0, w, h);
-    ctx.font = "italic 800 92px 'Segoe Script', 'Brush Script MT', " + FONT;
-    ctx.textAlign = "center"; ctx.textBaseline = "middle";
     const parts = text.split(" "), colors = ["#2de2e6", "#c9a6ff", "#ff7ac4"];
-    const widths = parts.map(function(p){ return ctx.measureText(p + " ").width; });
-    let x = w / 2 - widths.reduce(function(a, b){ return a + b; }, 0) / 2;
+    let size = 200, font;
+    do { font = "italic 700 " + size + "px 'Segoe UI', 'Trebuchet MS', " + FONT; ctx.font = font; size -= 6; }
+    while(ctx.measureText(text).width > w * 0.86 && size > 40);
+    ctx.textBaseline = "middle"; ctx.textAlign = "left"; ctx.lineJoin = "round";
+    const space = ctx.measureText(" ").width;
+    const widths = parts.map(function(p){ return ctx.measureText(p).width; });
+    let x = (w - (widths.reduce(function(a, b){ return a + b; }, 0) + space * (parts.length - 1))) / 2;
+    const y = h / 2 + 6;
     parts.forEach(function(p, i){
-      ctx.shadowColor = colors[i % 3]; ctx.shadowBlur = 24; ctx.fillStyle = "#ffffff";
-      ctx.textAlign = "left"; ctx.fillText(p, x, h / 2); ctx.shadowBlur = 0;
-      ctx.strokeStyle = colors[i % 3]; ctx.lineWidth = 3; ctx.strokeText(p, x, h / 2);
-      x += widths[i];
+      const c = colors[i % 3];
+      ctx.save();
+      ctx.shadowColor = c; ctx.shadowBlur = 38; ctx.strokeStyle = c; ctx.lineWidth = 16; ctx.globalAlpha = 0.55; ctx.strokeText(p, x, y);
+      ctx.globalAlpha = 1; ctx.shadowBlur = 16; ctx.lineWidth = 8; ctx.strokeText(p, x, y);
+      ctx.shadowBlur = 0; ctx.lineWidth = 3; ctx.strokeStyle = "#ffffff"; ctx.strokeText(p, x, y);
+      ctx.restore();
+      x += widths[i] + space;
     });
-  }).tex;
+  });
+  s.tex.anisotropy = 8;
+  return s.tex;
 }

@@ -26,10 +26,12 @@ export function glow(color, intensity){
   return new THREE.MeshStandardMaterial({ color: 0x000000, emissive: color, emissiveIntensity: intensity == null ? 2.2 : intensity, roughness: 1 });
 }
 
-// zaokraglony prostopadloscian ustawiony dolem na y (wygodne meblowanie)
+// zaokraglony prostopadloscian ustawiony dolem na y (wygodne meblowanie).
+// Styl "obly" jak w pokojach z Blendera: promien zaokraglenia powiekszony i wygladzony wieloma segmentami.
+export const ROUND = 2.4;
 export function rbox(w, h, d, material, radius, x, y, z, parent){
-  const r = Math.min(radius == null ? 0.03 : radius, w / 2, h / 2, d / 2);
-  const g = new RoundedBoxGeometry(w, h, d, 3, r);
+  const r = Math.min((radius == null ? 0.03 : radius) * ROUND, w / 2 - 0.0005, h / 2 - 0.0005, d / 2 - 0.0005);
+  const g = new RoundedBoxGeometry(w, h, d, 5, Math.max(0.001, r));
   const m = new THREE.Mesh(g, material);
   m.position.set(x || 0, (y || 0) + h / 2, z || 0);
   m.castShadow = true; m.receiveShadow = true;
@@ -44,14 +46,23 @@ export function box(w, h, d, material, x, y, z, parent){
   return m;
 }
 export function cyl(rt, rb, h, material, x, y, z, parent, seg){
-  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg || 20), material);
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg || 32), material);
   m.position.set(x || 0, (y || 0) + h / 2, z || 0);
   m.castShadow = true; m.receiveShadow = true;
   if(parent) parent.add(m);
   return m;
 }
 export function sphere(r, material, x, y, z, parent, seg){
-  const m = new THREE.Mesh(new THREE.SphereGeometry(r, seg || 18, Math.max(8, (seg || 18) - 4)), material);
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, seg || 28, Math.max(8, (seg || 28) - 6)), material);
+  m.position.set(x || 0, y || 0, z || 0);
+  m.castShadow = true; m.receiveShadow = true;
+  if(parent) parent.add(m);
+  return m;
+}
+// kapsula (miekkie walki, poduchy, oparcia) - os pozioma wzdluz x gdy horizontal
+export function capsule(r, len, material, x, y, z, parent, horizontal){
+  const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, len, 8, 24), material);
+  if(horizontal) m.rotation.z = Math.PI / 2;
   m.position.set(x || 0, y || 0, z || 0);
   m.castShadow = true; m.receiveShadow = true;
   if(parent) parent.add(m);

@@ -44,19 +44,19 @@ const pl = {
       kicker: "Ściana wspomnień",
       title: "Doświadczenie zawodowe",
       jobs: [
-        { co: "Comarch", years: "2022 – obecnie", role: "Analityk biznesowo-systemowy · Comarch Mobile",
+        { co: "Comarch", logo: "comarch", years: "2022 – obecnie", role: "Analityk biznesowo-systemowy · Comarch Mobile",
           points: ["Analiza wymagań i koncepcje rozwiązań omawiane z Product Managerem i zespołem deweloperskim.",
                    "Dokumentacja analityczno-techniczna i koncepcje UI/UX po konsultacjach i recenzjach krzyżowych.",
                    "Wsparcie implementacji i testy projektanckie; diagnostyka integracji (logi, API, SQL, JSON, XML).",
                    "Kilkadziesiąt zrealizowanych inicjatyw dla aplikacji z ponad 10 tys. licencji.",
                    "Wybrane projekty: promocje pakietowe i prolongaty, Asystent zamówień AI, telemetria aplikacji, powiązania oferta–zamówienie–faktura."] },
-        { co: "ALDI Polska", years: "2021 – 2022", role: "Kierownik sklepu",
+        { co: "ALDI Polska", logo: "aldi", years: "2021 – 2022", role: "Kierownik sklepu",
           points: ["Zarządzanie placówką, zespołem i sprzedażą w oparciu o KPI; regularność dostaw z sieci i od dostawców."] },
-        { co: "Grupa Kapitałowa SPECJAŁ", years: "2019 – 2021", role: "Kierownik zmiany",
+        { co: "Grupa Kapitałowa SPECJAŁ", logo: "specjal", years: "2019 – 2021", role: "Kierownik zmiany",
           points: ["Obszar magazynowy i dokumentacja logistyczna; planowanie tras i rozliczanie kierowców."] },
-        { co: "Sklepy Komfort S.A.", years: "2019", role: "Zastępca kierownika salonu",
+        { co: "Sklepy Komfort S.A.", logo: "komfort", years: "2019", role: "Zastępca kierownika salonu",
           points: ["Plany sprzedażowe, obieg dokumentów i zamówień, akcje promocyjne."] },
-        { co: "Auchan Retail Polska", years: "2016 – 2018", role: "Manager",
+        { co: "Auchan Retail Polska", logo: "auchan", years: "2016 – 2018", role: "Manager",
           points: ["Działy sezonowe, budżetowanie i rozwój zespołu; progresja wyników rok do roku."] }
       ]
     },
@@ -91,7 +91,7 @@ const pl = {
       groups: [
         ["Analiza i projektowanie", ["Analiza wymagań biznesowych i systemowych", "Koncepcje rozwiązań i dokumentacja", "Modelowanie BPMN i UML", "Projektowanie UI/UX aplikacji mobilnych", "Testy projektanckie", "Agile / Scrum"]],
         ["Technologie", ["SQL / T-SQL / MS SQL Server", "REST API, logi, JSON, XML", "Comarch ERP: XL, Altum, Optima", "Jira, TFS, GitHub, Figma"]],
-        ["AI w pracy analityka", ["ChatGPT, Claude, Gemini, NotebookLM", "Prompt engineering i proste agenty", "Automatyzacja dokumentacji i zgłoszeń w Jira", "Prototypowanie koncepcji i makiet UI"]]
+        ["AI w pracy analityka", ["ChatGPT, Claude, Gemini, NotebookLM", "Prompt engineering i proste agenty", "Automatyzacja: tworzenie dokumentacji, zgłoszeń w Jira i zadań w Figmie", "Prototypowanie koncepcji i makiet UI"]]
       ]
     },
     hobby: {
@@ -140,19 +140,19 @@ const en = {
       kicker: "Memory wall",
       title: "Work experience",
       jobs: [
-        { co: "Comarch", years: "2022 – present", role: "Business & Systems Analyst · Comarch Mobile",
+        { co: "Comarch", logo: "comarch", years: "2022 – present", role: "Business & Systems Analyst · Comarch Mobile",
           points: ["Requirements analysis and solution concepts discussed with the Product Manager and the development team.",
                    "Analytical and technical documentation and UI/UX concepts after consultations and cross-reviews.",
                    "Implementation support and design testing; integration diagnostics (logs, API, SQL, JSON, XML).",
                    "Dozens of delivered initiatives for an app with over 10,000 licences.",
                    "Selected projects: bundle promotions and payment extensions, AI order assistant, app telemetry, offer–order–invoice links."] },
-        { co: "ALDI Poland", years: "2021 – 2022", role: "Store Manager",
+        { co: "ALDI Poland", logo: "aldi", years: "2021 – 2022", role: "Store Manager",
           points: ["Managed the store, team and sales based on KPIs; ensured regular deliveries from the chain and suppliers."] },
-        { co: "SPECJAŁ Group", years: "2019 – 2021", role: "Shift Manager",
+        { co: "SPECJAŁ Group", logo: "specjal", years: "2019 – 2021", role: "Shift Manager",
           points: ["Warehouse area and logistics documentation; route planning and driver settlements."] },
-        { co: "Komfort S.A.", years: "2019", role: "Deputy Store Manager",
+        { co: "Komfort S.A.", logo: "komfort", years: "2019", role: "Deputy Store Manager",
           points: ["Sales targets, document and order flow, promotional campaigns."] },
-        { co: "Auchan Retail Poland", years: "2016 – 2018", role: "Manager",
+        { co: "Auchan Retail Poland", logo: "auchan", years: "2016 – 2018", role: "Manager",
           points: ["Seasonal departments, budgeting and team development; year-on-year growth."] }
       ]
     },
@@ -187,7 +187,7 @@ const en = {
       groups: [
         ["Analysis & design", ["Business and system requirements analysis", "Solution concepts and documentation", "BPMN and UML modelling", "Mobile UI/UX design", "Design testing", "Agile / Scrum"]],
         ["Technology", ["SQL / T-SQL / MS SQL Server", "REST API, logs, JSON, XML", "Comarch ERP: XL, Altum, Optima", "Jira, TFS, GitHub, Figma"]],
-        ["AI in analyst work", ["ChatGPT, Claude, Gemini, NotebookLM", "Prompt engineering and simple agents", "Automated documentation and Jira tickets", "Concept and UI mock-up prototyping"]]
+        ["AI in analyst work", ["ChatGPT, Claude, Gemini, NotebookLM", "Prompt engineering and simple agents", "Automation: documentation, Jira tickets and Figma tasks", "Concept and UI mock-up prototyping"]]
       ]
     },
     hobby: {
