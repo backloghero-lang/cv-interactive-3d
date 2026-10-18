@@ -1,0 +1,101 @@
+:root{
+  --bg1:#2a2350; --bg2:#0d0b1e; --ink:#eef0ff; --muted:#a9aed6; --purple:#9b5cff; --cyan:#2de2e6; --panel:rgba(16,14,34,.92);
+  --font: "Segoe UI", Inter, system-ui, -apple-system, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(120% 90% at 30% 20%, #3b3a78 0%, #1b1838 55%, #0d0b1e 100%);color:var(--ink);font-family:var(--font);transition:background .8s}
+body.night{background:radial-gradient(120% 90% at 30% 20%, #241c4f 0%, #0e0b24 55%, #05040d 100%)}
+#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+
+/* nazwisko w rogu */
+.brand{position:fixed;left:max(20px, env(safe-area-inset-left));top:max(16px, env(safe-area-inset-top));pointer-events:none;text-shadow:0 2px 12px rgba(0,0,0,.45);opacity:0;transform:translateY(-6px);transition:.8s .3s}
+.entered .brand{opacity:1;transform:none}
+.brand h1{margin:0;font-size:clamp(20px,2.4vw,30px);font-weight:800;letter-spacing:.3px}
+.brand p{margin:2px 0 0;font-size:14px;color:var(--cyan);font-weight:600}
+.brand .sub{color:var(--muted);font-weight:500;font-size:12.5px}
+
+/* przyciski */
+.tools{position:fixed;right:max(16px, env(safe-area-inset-right));top:max(16px, env(safe-area-inset-top));display:flex;gap:8px;opacity:0;transition:.8s .4s}
+.entered .tools{opacity:1}
+.tool{min-width:42px;height:42px;padding:0 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(20,18,44,.6);backdrop-filter:blur(8px);color:var(--ink);font:700 14px var(--font);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;transition:.2s}
+.tool:hover{border-color:var(--cyan);box-shadow:0 0 14px rgba(45,226,230,.35)}
+.tool:focus-visible,.pin:focus-visible,.enter:focus-visible,.panel a:focus-visible,.panel-close:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.tool.wide{background:linear-gradient(135deg,var(--purple),#6a3ce0);border-color:transparent}
+.tool.on{border-color:var(--purple)}
+
+/* punkty interakcji (jak u Bruno Simona: pulsujacy znacznik + etykieta) */
+.pins{position:fixed;inset:0;pointer-events:none}
+.pin{position:absolute;left:0;top:0;margin:-17px 0 0 -17px;width:34px;height:34px;border:0;padding:0;background:none;cursor:pointer;pointer-events:auto;opacity:0;transition:opacity .4s}
+.entered .pin{opacity:1}
+.is-focused .pin,.pin.hidden{opacity:0;pointer-events:none}
+.pin-dot{position:absolute;inset:9px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(155,92,255,.85),0 0 18px rgba(45,226,230,.9)}
+.pin::before{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid rgba(45,226,230,.85);animation:pulse 2s var(--d,0s) infinite ease-out}
+.pin-label{position:absolute;left:40px;top:50%;transform:translate(-6px,-50%);white-space:nowrap;padding:6px 11px;border-radius:9px;background:rgba(16,14,34,.88);border:1px solid rgba(155,92,255,.5);color:#fff;font:700 13px var(--font);opacity:0;transition:.25s;pointer-events:none}
+.pin:hover .pin-label,.pin:focus-visible .pin-label{opacity:1;transform:translate(0,-50%)}
+@media (pointer:coarse) and (min-width:641px){ .pin-label{opacity:.95;transform:translate(0,-50%);font-size:12px;padding:4px 8px} }
+@keyframes pulse{0%{transform:scale(.6);opacity:1}100%{transform:scale(1.7);opacity:0}}
+
+.hint{position:fixed;left:50%;bottom:max(18px, env(safe-area-inset-bottom));transform:translateX(-50%);margin:0;padding:8px 14px;border-radius:20px;background:rgba(16,14,34,.6);color:var(--muted);font-size:12.5px;white-space:nowrap;opacity:0;transition:.8s 1.2s;pointer-events:none}
+.entered .hint{opacity:1}
+.is-focused .hint{opacity:0;transition-delay:0s}
+.text-link{position:fixed;left:max(20px, env(safe-area-inset-left));bottom:max(18px, env(safe-area-inset-bottom));color:var(--muted);font-size:12px;opacity:0;transition:.8s 1.2s}
+.entered .text-link{opacity:.8}
+
+/* panel z trescia */
+.panel{position:fixed;top:0;right:0;height:100%;width:min(440px,100%);padding:64px 30px 40px;background:var(--panel);backdrop-filter:blur(14px);border-left:1px solid rgba(155,92,255,.35);box-shadow:-20px 0 60px rgba(0,0,0,.45);overflow-y:auto;transform:translateX(105%);transition:transform .55s cubic-bezier(.2,.8,.2,1);z-index:5}
+.panel.open{transform:none}
+.panel-close{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#fff;font-size:16px;cursor:pointer}
+.panel .kicker{margin:0;color:var(--cyan);font:700 12px var(--font);letter-spacing:2px;text-transform:uppercase}
+.panel h2{margin:6px 0 14px;font-size:28px;line-height:1.15}
+.panel h3{margin:20px 0 8px;font-size:16px;color:#d9ccff}
+.panel p{color:#d6d8f0;line-height:1.6;font-size:15px}
+.panel .role{color:var(--cyan);font-weight:600;margin:2px 0 8px}
+.panel .note{font-size:12.5px;color:var(--muted)}
+.panel a{color:var(--cyan)}
+.contact{list-style:none;padding:0;margin:18px 0}
+.contact li{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:14.5px}
+.contact li span{color:var(--muted)}
+.btn{display:inline-block;margin-top:8px;padding:12px 18px;border-radius:12px;background:linear-gradient(135deg,var(--purple),#6a3ce0);color:#fff!important;text-decoration:none;font-weight:700}
+.timeline{list-style:none;padding:0;margin:0;border-left:2px solid rgba(155,92,255,.5)}
+.timeline>li{position:relative;padding:0 0 18px 18px}
+.timeline>li::before{content:"";position:absolute;left:-7px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.tl-head{display:flex;justify-content:space-between;gap:10px;font-size:16px}
+.tl-head span{color:var(--muted);font-size:13px;white-space:nowrap}
+.timeline ul{margin:4px 0 0;padding-left:18px;color:#d6d8f0;font-size:14px;line-height:1.55}
+.certs{list-style:none;padding:0;margin:0}
+.certs li{display:flex;justify-content:space-between;padding:12px 14px;margin-bottom:8px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.certs li span{color:var(--cyan);font-weight:700}
+.edu{margin-top:16px}
+.project{padding:16px;margin:12px 0;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(155,92,255,.3)}
+.project h3{margin:0 0 4px}
+.project p{margin:0 0 10px;font-size:14px}
+.links{display:flex;gap:14px;font-weight:700}
+.chips{list-style:none;display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0}
+.chips li{padding:7px 11px;border-radius:999px;background:rgba(155,92,255,.16);border:1px solid rgba(155,92,255,.4);font-size:13px}
+
+/* ekran ladowania */
+.loader{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(80% 70% at 50% 40%, #2a2350 0%, #0d0b1e 75%);z-index:10;transition:opacity .9s, visibility .9s}
+.loader.gone{opacity:0;visibility:hidden}
+.loader-box{text-align:center;padding:20px}
+.loader-logo{width:84px;height:84px;margin:0 auto 16px;display:grid;place-items:center;border-radius:22px;font:800 30px var(--font);color:#fff;background:linear-gradient(135deg,var(--purple),var(--cyan));box-shadow:0 0 40px rgba(155,92,255,.55)}
+.loader-name{margin:0;font-size:24px;font-weight:800}
+.loader-text{margin:6px 0 18px;color:var(--muted);font-size:14px}
+.bar{width:220px;height:4px;margin:0 auto 26px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--cyan));transition:width .4s}
+.enter{padding:14px 26px;border-radius:14px;border:1px solid rgba(45,226,230,.6);background:rgba(45,226,230,.08);color:#fff;font:700 15px var(--font);cursor:pointer;opacity:0;transform:translateY(6px);transition:.5s}
+.loader.ready .enter{opacity:1;transform:none}
+.loader.ready .enter:hover{background:rgba(45,226,230,.2);box-shadow:0 0 22px rgba(45,226,230,.45)}
+.noscript{position:fixed;inset:auto 0 40% 0;text-align:center}
+
+/* telefon: panel od dolu */
+@media (max-width:640px){
+  .is-focused .brand{opacity:0}
+  .panel{top:auto;bottom:0;height:60%;width:100%;border-left:0;border-top:1px solid rgba(155,92,255,.35);border-radius:22px 22px 0 0;transform:translateY(105%);padding:56px 20px 30px}
+  .panel.open{transform:none}
+  .tools .wide{display:none}
+  .hint{font-size:11.5px}
+  .brand .sub{display:none}
+}
+.og .tools,.og .pins,.og .hint,.og .text-link{display:none}
+.og .brand{opacity:1;transform:none;transition:none}
+@media (prefers-reduced-motion:reduce){ .pin::before{animation:none} }

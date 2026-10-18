@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Dariusz Masłyk — Analityk biznesowo-systemowy</title>
+  <meta name="description" content="Interaktywne CV 3D: Dariusz Masłyk, analityk biznesowo-systemowy (aplikacje mobilne, Comarch ERP, integracje, AI).">
+  <meta name="theme-color" content="#0d0b1e">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Dariusz Masłyk — interaktywne CV">
+  <meta property="og:description" content="Wejdź do mojego pokoju 3D i poznaj doświadczenie, projekty i umiejętności.">
+  <meta property="og:url" content="https://backloghero-lang.github.io/">
+  <meta property="og:image" content="https://backloghero-lang.github.io/assets/og-image.png">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.js", "three/addons/": "./vendor/addons/" } }
+  </script>
+</head>
+<body>
+  <canvas id="scene" aria-label="Interaktywny pokój 3D"></canvas>
+
+  <header class="brand">
+    <h1>Dariusz Masłyk</h1>
+    <p id="who">Analityk biznesowo-systemowy</p>
+    <p id="sub" class="sub"></p>
+  </header>
+
+  <nav class="tools" aria-label="Ustawienia">
+    <a id="btnCv" class="tool wide" href="assets/cv-dariusz-maslyk-pl.pdf" download>Pobierz CV</a>
+    <button id="btnLang" class="tool" type="button">EN</button>
+    <button id="btnMode" class="tool" type="button">☀</button>
+    <button id="btnSound" class="tool" type="button">🔈</button>
+  </nav>
+
+  <div id="pins" class="pins"></div>
+  <p id="hint" class="hint"></p>
+  <a id="textLink" class="text-link" href="cv.html">Wersja tekstowa</a>
+
+  <aside id="panel" class="panel" aria-hidden="true" aria-live="polite">
+    <button id="panelClose" class="panel-close" type="button" aria-label="Zamknij">✕</button>
+    <div id="panelBody"></div>
+  </aside>
+
+  <div id="loader" class="loader">
+    <div class="loader-box">
+      <div class="loader-logo">DM</div>
+      <p class="loader-name">Dariusz Masłyk</p>
+      <p id="loadText" class="loader-text">Urządzam pokój…</p>
+      <div class="bar"><span id="loadBar"></span></div>
+      <button id="enterBtn" class="enter" type="button" disabled>Wejdź do pokoju</button>
+    </div>
+  </div>
+
+  <noscript><p class="noscript">Ta strona wymaga JavaScript. <a href="cv.html">Zobacz wersję tekstową CV</a>.</p></noscript>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
