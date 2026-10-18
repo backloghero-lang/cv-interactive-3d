@@ -50,7 +50,7 @@ export function buildCharacter(scene, seat){
   part(0.11, 0.08, 0.11, skin, neck, 0, 0.03, 0);
   const head = pivot(neck, 0, 0.08, 0);
   part(0.26, 0.3, 0.26, skin, head, 0, 0.15, 0, 0.07);
-  part(0.28, 0.15, 0.22, beard, head, 0, 0.06, -0.03, 0.06);        // broda
+  part(0.275, 0.11, 0.21, beard, head, 0, 0.085, -0.035, 0.05);     // broda - krotka, konczy sie na linii szyi
   part(0.12, 0.03, 0.04, beard, head, 0, 0.13, -0.13, 0.012);      // wasy
   part(0.04, 0.05, 0.05, skin, head, 0, 0.17, -0.14, 0.015);       // nos
   [-0.065, 0.065].forEach(function(x){ part(0.035, 0.03, 0.02, mat(0x1b1410), head, x, 0.21, -0.13, 0.008); });  // oczy

@@ -272,48 +272,94 @@ export function companyPhoto(key, name, years){
   return s.tex;
 }
 
-// ---------- certyfikat w ramce ----------
+// ---------- certyfikat w stylu cyberpunk: holograficzny panel z neonowym obrysem ----------
 export function certificate(title, year, accent){
-  return canvasTexture(300, 220, function(ctx, w, h){
-    ctx.fillStyle = "#f6f1e6"; ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = accent; ctx.lineWidth = 6; ctx.strokeRect(10, 10, w - 20, h - 20);
-    ctx.fillStyle = "#3b3f58"; ctx.textAlign = "center"; ctx.font = "700 16px " + FONT; ctx.fillText("CERTYFIKAT · " + year, w / 2, 52);
-    ctx.font = "800 22px " + FONT; ctx.fillStyle = "#1c2033";
+  return canvasTexture(600, 440, function(ctx, w, h){
+    ctx.fillStyle = grad(ctx, 0, 0, w, h, [[0, "#0b0f24"], [1, "#160a2c"]]); ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = "rgba(45,226,230,.10)"; ctx.lineWidth = 1;
+    for(let x = 0; x < w; x += 24){ ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+    for(let y = 0; y < h; y += 24){ ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+    for(let y = 0; y < h; y += 4){ ctx.fillStyle = "rgba(255,255,255,.025)"; ctx.fillRect(0, y, w, 1); }   // linie skanowania
+    // scieta neonowa ramka
+    const c = 34;
+    ctx.save(); ctx.shadowColor = accent; ctx.shadowBlur = 22; ctx.strokeStyle = accent; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(c + 14, 14); ctx.lineTo(w - 14, 14); ctx.lineTo(w - 14, h - c - 14); ctx.lineTo(w - c - 14, h - 14); ctx.lineTo(14, h - 14); ctx.lineTo(14, c + 14); ctx.closePath(); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = accent; ctx.fillRect(40, 40, 120, 8); ctx.fillRect(w - 110, h - 52, 70, 6);
+    ctx.fillStyle = accent; ctx.font = "700 24px " + MONO; ctx.fillText("// CERT_" + year, 40, 92);
+    ctx.fillStyle = "#ffffff"; ctx.font = "800 44px " + FONT;
+    ctx.save(); ctx.shadowColor = accent; ctx.shadowBlur = 14;
     const words = title.split(" "), lines = []; let cur = "";
-    words.forEach(function(wd){ if(ctx.measureText(cur + " " + wd).width > w - 50){ lines.push(cur); cur = wd; } else cur = cur ? cur + " " + wd : wd; });
+    words.forEach(function(wd){ if(ctx.measureText(cur + " " + wd).width > w - 90){ lines.push(cur); cur = wd; } else cur = cur ? cur + " " + wd : wd; });
     lines.push(cur);
-    lines.forEach(function(l, i){ ctx.fillText(l, w / 2, 100 + i * 28); });
-    ctx.fillStyle = accent; ctx.beginPath(); ctx.arc(w / 2, h - 38, 14, 0, 7); ctx.fill();
+    lines.forEach(function(l, i){ ctx.fillText(l, 40, 170 + i * 52); });
+    ctx.restore();
+    // znaczek "VERIFIED" i pseudo-kod QR
+    ctx.strokeStyle = "#28c840"; ctx.lineWidth = 3; roundRect(ctx, 40, h - 92, 170, 40, 8); ctx.stroke();
+    ctx.fillStyle = "#28c840"; ctx.font = "800 22px " + MONO; ctx.fillText("✔ VERIFIED", 54, h - 64);
+    for(let i = 0; i < 7; i++) for(let j = 0; j < 7; j++) if((i * 7 + j * 3 + year.length) % 3) { ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.fillRect(w - 150 + i * 12, 60 + j * 12, 10, 10); }
   }).tex;
 }
 
-// ---------- tablica korkowa z karteczkami ----------
+// ---------- tablica w stylu Miro: kropkowane tlo, ramki z karteczkami, strzalki, kursory wspolpracownikow ----------
 export function skillsBoard(){
-  return canvasTexture(900, 560, function(ctx, w, h){
-    ctx.fillStyle = "#b98a5a"; ctx.fillRect(0, 0, w, h);
-    for(let i = 0; i < 2600; i++){ ctx.fillStyle = "rgba(90,55,25," + (Math.random() * 0.25) + ")"; ctx.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
-    const notes = [["Analiza\nwymagań", "#ffe46b"], ["BPMN\nUML", "#7df0c8"], ["SQL\nT-SQL", "#8fc8ff"], ["REST API\nJSON · XML", "#ffb3d1"], ["UI / UX\nmobile", "#c9a6ff"],
-                   ["Comarch\nERP", "#ffe46b"], ["AI\nagenci", "#7df0c8"], ["Jira\nScrum", "#ffb3d1"], ["Testy\nprojektanckie", "#8fc8ff"], ["Automaty-\nzacja", "#c9a6ff"]];
-    const pos = [];
-    notes.forEach(function(n, i){
-      const col = i % 5, row = Math.floor(i / 5);
-      const x = 30 + col * 170, y = 40 + row * 250 + (col % 2) * 20, rot = (Math.sin(i * 3.3) * 0.07);
-      pos.push([x + 70, y + 12]);
-      ctx.save(); ctx.translate(x + 70, y + 70); ctx.rotate(rot);
-      ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.fillRect(-64, -60, 140, 140);
-      ctx.fillStyle = n[1]; ctx.fillRect(-70, -70, 140, 140);
-      ctx.fillStyle = "#222"; ctx.font = "700 22px 'Segoe Print', 'Comic Sans MS', " + FONT; ctx.textAlign = "center";
-      n[0].split("\n").forEach(function(l, k){ ctx.fillText(l, 0, -6 + k * 28); });
-      ctx.restore();
+  const W = 1248, H = 776;
+  const s = canvasTexture(W, H);
+  let t = 0, acc = 1;
+  const frames = [
+    { x: 70, y: 70, w: 360, h: 300, title: "Analiza", notes: [["Wymagania\nbiznesowe", "#fff17a"], ["BPMN\nUML", "#fff17a"], ["UI / UX\nmobile", "#ffd3e2"], ["Testy\nprojekt.", "#ffd3e2"]] },
+    { x: 470, y: 70, w: 360, h: 300, title: "Technologie", notes: [["SQL\nT-SQL", "#c9f0ff"], ["REST API\nJSON·XML", "#c9f0ff"], ["Comarch\nERP", "#d5f5c7"], ["Jira\nFigma", "#d5f5c7"]] },
+    { x: 870, y: 70, w: 320, h: 300, title: "AI", notes: [["Agenci\nAI", "#e4d7ff"], ["Prompt\neng.", "#e4d7ff"], ["Automa-\ntyzacja", "#ffe0b8"], ["Claude\nGemini", "#ffe0b8"]] }
+  ];
+  const flow = [[150, 520, "Wymaganie"], [400, 520, "Analiza"], [650, 520, "Projekt UI"], [900, 520, "Wdrożenie"]];
+  const cursors = [{ n: "Dariusz", c: "#7b4dff", p: 0 }, { n: "PM", c: "#ff4f8b", p: 2.1 }, { n: "Dev", c: "#00b37e", p: 4.2 }];
+  function arrow(ctx, x1, y1, x2, y2){
+    ctx.strokeStyle = "#4b5563"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    const a = Math.atan2(y2 - y1, x2 - x1); ctx.fillStyle = "#4b5563"; ctx.beginPath();
+    ctx.moveTo(x2, y2); ctx.lineTo(x2 - 14 * Math.cos(a - 0.4), y2 - 14 * Math.sin(a - 0.4)); ctx.lineTo(x2 - 14 * Math.cos(a + 0.4), y2 - 14 * Math.sin(a + 0.4)); ctx.fill();
+  }
+  function draw(){
+    const ctx = s.ctx;
+    ctx.fillStyle = "#f5f6f8"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#d4d7de"; for(let x = 12; x < W; x += 24) for(let y = 12; y < H; y += 24) ctx.fillRect(x, y, 2, 2);
+    // ramki z karteczkami
+    frames.forEach(function(f){
+      ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#e1e4ea"; ctx.lineWidth = 2; ctx.fillRect(f.x, f.y, f.w, f.h); ctx.strokeRect(f.x, f.y, f.w, f.h);
+      ctx.fillStyle = "#5b6070"; ctx.font = "600 22px " + FONT; ctx.fillText(f.title, f.x, f.y - 12);
+      f.notes.forEach(function(n, i){
+        const nx = f.x + 24 + (i % 2) * ((f.w - 48) / 2 + 8), ny = f.y + 26 + Math.floor(i / 2) * 136, nw = (f.w - 64) / 2, nh = 118;
+        ctx.fillStyle = "rgba(0,0,0,.08)"; ctx.fillRect(nx + 3, ny + 5, nw, nh);
+        ctx.fillStyle = n[1]; ctx.fillRect(nx, ny, nw, nh);
+        ctx.fillStyle = "#1f2430"; ctx.font = "600 24px " + FONT; ctx.textAlign = "center";
+        n[0].split("\n").forEach(function(l, k){ ctx.fillText(l, nx + nw / 2, ny + 50 + k * 30); });
+        ctx.textAlign = "left";
+      });
     });
-    // nitka laczaca karteczki
-    ctx.strokeStyle = "#d1263b"; ctx.lineWidth = 3; ctx.beginPath();
-    [0, 1, 6, 8, 3].forEach(function(k, i){ const p = pos[k]; if(i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); });
-    ctx.stroke();
-    pos.forEach(function(p){ ctx.fillStyle = "#d1263b"; ctx.beginPath(); ctx.arc(p[0], p[1], 8, 0, 7); ctx.fill(); });
-  }).tex;
+    // przeplyw (jak diagram na tablicy)
+    for(let i = 0; i < flow.length - 1; i++) arrow(ctx, flow[i][0] + 88, flow[i][1], flow[i + 1][0] - 92, flow[i + 1][1]);
+    flow.forEach(function(f, i){
+      ctx.fillStyle = i === flow.length - 1 ? "#4262ff" : "#ffffff"; ctx.strokeStyle = "#4262ff"; ctx.lineWidth = 3;
+      roundRect(ctx, f[0] - 88, f[1] - 34, 176, 68, 14); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = i === flow.length - 1 ? "#ffffff" : "#1f2430"; ctx.font = "700 24px " + FONT; ctx.textAlign = "center"; ctx.fillText(f[2], f[0], f[1] + 8); ctx.textAlign = "left";
+    });
+    // pasek narzedzi i zoom (jak w Miro)
+    ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#e1e4ea"; roundRect(ctx, 14, 240, 46, 250, 10); ctx.fill(); ctx.stroke();
+    ["#4262ff", "#9aa1b0", "#9aa1b0", "#9aa1b0", "#9aa1b0"].forEach(function(c, i){ ctx.fillStyle = c; roundRect(ctx, 25, 254 + i * 46, 24, 24, 6); ctx.fill(); });
+    ctx.fillStyle = "#ffffff"; roundRect(ctx, W - 150, H - 60, 130, 42, 10); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#1f2430"; ctx.font = "600 20px " + FONT; ctx.fillText("−  100%  +", W - 134, H - 32);
+    // poruszajace sie kursory wspolpracownikow
+    cursors.forEach(function(c, i){
+      const x = 220 + i * 330 + Math.sin(t * 0.5 + c.p) * 160, y = 330 + Math.cos(t * 0.37 + c.p * 1.3) * 230;
+      ctx.fillStyle = c.c; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 30); ctx.lineTo(x + 9, y + 22); ctx.lineTo(x + 21, y + 22); ctx.closePath(); ctx.fill();
+      ctx.font = "700 18px " + FONT; const tw = ctx.measureText(c.n).width;
+      roundRect(ctx, x + 16, y + 26, tw + 18, 28, 8); ctx.fill();
+      ctx.fillStyle = "#ffffff"; ctx.fillText(c.n, x + 25, y + 46);
+    });
+    s.tex.needsUpdate = true;
+  }
+  draw();
+  return { tex: s.tex, update: function(dt){ t += dt; acc += dt; if(acc > 1 / 20){ acc = 0; draw(); } } };
 }
-
 // ---------- etykiety kartridzy ----------
 export function cartridgeLabel(name, c1, c2){
   return canvasTexture(256, 160, function(ctx, w, h){

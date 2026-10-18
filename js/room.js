@@ -176,39 +176,55 @@ export function buildRoom(scene, opts){
 
   // ---------- regal z certyfikatami (lewa sciana, rog) ----------
   const shelf = group(room, -2.8, 0, -2.45);
-  const woodM = mat(C.woodDark);
-  [0, 0.55, 1.1, 1.65, 2.15].forEach(function(y){ rbox(0.36, 0.04, 0.86, woodM, 0.01, 0, y, 0, shelf); });
-  rbox(0.36, 2.2, 0.04, woodM, 0.01, 0, 0, -0.43, shelf);
-  rbox(0.36, 2.2, 0.04, woodM, 0.01, 0, 0, 0.43, shelf);
-  // ksiazki
-  const bookCols = [C.purple, C.cyan, 0xe85d4a, 0xffd23f, 0x3fb56b, 0x8fc8ff, 0xc9a6ff];
-  for(let i = 0; i < 11; i++){ const h = 0.32 + (i * 7 % 5) * 0.03; rbox(0.24, h, 0.055, mat(bookCols[i % bookCols.length]), 0.008, 0, 0.04, -0.36 + i * 0.065, shelf); }
-  // certyfikaty w ramkach
-  const certAccents = ["#9b5cff", "#2de2e6", "#e85d4a", "#3fb56b", "#ffb000"];
+  // regal w stylu cyberpunk: grafitowy metal, neonowe listwy LED pod kazda polka
+  const metalM = mat(0x1b1d2b, { metalness: 0.6, roughness: 0.35 });
+  [0, 0.55, 1.1, 1.65, 2.15].forEach(function(y, i){
+    rbox(0.36, 0.04, 0.86, metalM, 0.01, 0, y, 0, shelf);
+    const lm = glow(i % 2 ? C.pink : C.cyan, 2.6); R.glowMats.push(lm);
+    box(0.012, 0.012, 0.8, lm, 0.17, y - 0.012, 0, shelf);
+  });
+  rbox(0.36, 2.2, 0.04, metalM, 0.01, 0, 0, -0.43, shelf);
+  rbox(0.36, 2.2, 0.04, metalM, 0.01, 0, 0, 0.43, shelf);
+  [-0.43, 0.43].forEach(function(z){ const sm = glow(C.purple, 2.2); R.glowMats.push(sm); box(0.012, 2.18, 0.012, sm, 0.18, 0.01, z, shelf); });
+  // ksiazki (ciemne grzbiety z kolorowymi paskami) i maly hologram
+  for(let i = 0; i < 11; i++){
+    const h = 0.32 + (i * 7 % 5) * 0.03, z = -0.36 + i * 0.065;
+    rbox(0.24, h, 0.055, mat(i % 3 ? 0x23263a : 0x2e1f48), 0.008, 0, 0.04, z, shelf);
+    const bm = glow([C.cyan, C.purple, C.pink][i % 3], 1.4); R.glowMats.push(bm);
+    box(0.004, 0.02, 0.05, bm, 0.121, 0.04 + h * 0.7, z, shelf);
+  }
+  // certyfikaty: holograficzne panele w scietych ramkach z neonowa krawedzia
+  const certAccents = ["#9b5cff", "#2de2e6", "#ff4fa3", "#3fe08a", "#ffb000"];
   const certs = [["AI Academy", "2026"], ["UML: Modelowanie Systemów", "2025"], ["T-SQL: MS SQL Server", "2024"], ["BPMN: Modelowanie Procesów", "2023"], ["Inżynieria Wymagań", "2023"]];
   const certPos = [[0.59, -0.2], [0.59, 0.2], [1.14, -0.2], [1.14, 0.2], [1.69, 0]];
   certs.forEach(function(c, i){
     const p = certPos[i], g = group(shelf, 0.02, p[0], p[1]);
     g.rotation.z = 0.12;
-    rbox(0.03, 0.32, 0.36, mat(C.wood), 0.008, 0, 0, 0, g);
-    const m = screenMesh(0.3, 0.22, S.certificate(c[0], c[1], certAccents[i]), false);
-    m.rotation.y = Math.PI / 2; m.position.set(0.017, 0.16, 0); g.add(m);
+    rbox(0.03, 0.32, 0.38, mat(0x0d0f1c, { metalness: 0.5, roughness: 0.4 }), 0.006, 0, 0, 0, g);
+    const em = glow(new THREE.Color(certAccents[i]).getHex(), 2.4); R.glowMats.push(em);
+    [[0.012, 0.3], [0.31, 0.3]].forEach(function(q){ box(0.006, 0.008, q[1], em, 0.017, q[0], 0, g); });
+    const m = screenMesh(0.33, 0.24, S.certificate(c[0], c[1], certAccents[i]), true);
+    m.rotation.y = Math.PI / 2; m.position.set(0.018, 0.16, 0); g.add(m);
   });
-  // puchar + dyplom w tubie
-  const cupM = mat(0xf2c14e, { metalness: 0.7, roughness: 0.3 });
-  cyl(0.05, 0.07, 0.06, mat(C.black), 0.0, 1.69, 0.32, shelf);
-  cyl(0.03, 0.012, 0.1, cupM, 0.0, 1.75, 0.32, shelf);
-  cyl(0.09, 0.04, 0.12, cupM, 0.0, 1.85, 0.32, shelf);
-  cyl(0.035, 0.035, 0.42, mat(0x1c2033), 0.0, 2.19, -0.2, shelf).rotation.z = Math.PI / 2;
+  // kostka hologramu z obracajacym sie logo "AI"
+  cyl(0.07, 0.08, 0.03, metalM, 0.0, 1.69, 0.32, shelf);
+  const holoM = new THREE.MeshBasicMaterial({ color: 0x2de2e6, transparent: true, opacity: 0.35, wireframe: true });
+  const holo = new THREE.Mesh(new THREE.IcosahedronGeometry(0.075, 1), holoM); holo.position.set(0, 1.84, 0.32); shelf.add(holo);
+  const holoCore = sphere(0.03, glow(C.purple, 3), 0, 1.84, 0.32, shelf, 16); holoCore.castShadow = false;
+  R.anim.push(function(dt, t){ holo.rotation.y += dt * 0.9; holo.rotation.x = Math.sin(t) * 0.3; holo.position.y = 1.84 + Math.sin(t * 1.6) * 0.015; });
   R.anchors.shelf = new THREE.Vector3(-2.75, 2.55, -2.45);
 
-  // ---------- tablica umiejetnosci (tylna sciana) ----------
+  // ---------- tablica umiejetnosci w stylu Miro (biala tablica w cienkiej ramie) ----------
   const board = group(room, -0.5, 0, -2.98);
-  rbox(1.66, 1.06, 0.05, mat(C.woodDark), 0.02, 0, 1.24, 0, board);
-  const boardMesh = screenMesh(1.56, 0.97, S.skillsBoard(), false);
-  boardMesh.position.set(0, 1.77, 0.03); board.add(boardMesh);
+  rbox(1.66, 1.06, 0.04, mat(0xd8dbe4, { metalness: 0.4, roughness: 0.4 }), 0.012, 0, 1.24, 0, board);
+  const boardScr = S.skillsBoard();
+  const boardMesh = screenMesh(1.6, 0.995, boardScr.tex, true);
+  boardMesh.material.emissiveIntensity = 0.35;
+  boardMesh.position.set(0, 1.77, 0.022); board.add(boardMesh);
+  rbox(1.2, 0.04, 0.08, mat(0xd8dbe4), 0.01, 0, 1.2, 0.04, board);   // polka na markery
+  [[-0.4, 0x4262ff], [-0.3, 0xff4f8b], [-0.2, 0x00b37e]].forEach(function(m){ capsule(0.012, 0.1, mat(m[1]), m[0], 1.255, 0.05, board, true); });
+  R.screens.board = boardScr;
   R.anchors.board = new THREE.Vector3(-0.5, 2.55, -2.85);
-
   // ---------- TV + konsola z projektami ----------
   const tvScr = S.tvScreen(opts.getLang);
   const tv = group(room, 1.8, 0, -2.96);
@@ -380,6 +396,7 @@ export function buildRoom(scene, opts){
     R.screens.side.update(dt);
     R.screens.tv.update(dt);
     R.screens.frame.update(dt);
+    R.screens.board.update(dt);
   };
   R.anchors.desk = new THREE.Vector3(-2.6, 1.95, -0.7);
   return R;
