@@ -101,4 +101,7 @@ body.night{background:radial-gradient(120% 90% at 30% 20%, #241c4f 0%, #0e0b24 5
 .og .tools,.og .pins,.og .hint,.og .text-link{display:none}
 .og .brand{opacity:1;transform:none;transition:none}
 @media (prefers-reduced-motion:reduce){ .pin::before{animation:none} }
-#btnMode:not(.on){filter:grayscale(1);opacity:.6}
+/* znacznik lampy: cieply kolor; po zgaszeniu przygaszony */
+.pin-lamp .pin-dot{background:#fff3d6;box-shadow:0 0 0 3px rgba(255,194,120,.9),0 0 18px rgba(255,194,120,.95)}
+.pin-lamp::before{border-color:rgba(255,194,120,.85)}
+.pin-lamp.off .pin-dot{background:#9aa0b8;box-shadow:0 0 0 3px rgba(120,126,160,.8)}

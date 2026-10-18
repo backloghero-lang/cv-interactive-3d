@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
-import { C, mat, canvasTexture } from "./util.js?v=20261018b";
+import { C, mat, canvasTexture } from "./util.js?v=20261018c";
 
 // element wysrodkowany w punkcie (x,y,z) wzgledem rodzica
 function part(w, h, d, material, parent, x, y, z, r){

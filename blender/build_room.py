@@ -122,7 +122,8 @@ def apply_modifiers(obj):
     if old.users == 0: bpy.data.meshes.remove(old)
 
 # ---------------------------------------------------------------- materialy (paleta jak w js/util.js)
-C = dict(wall=0x2b2f45, wallDark=0x23263a, base=0x1a1c2b, wood=0x8a5a3c, woodDark=0x5e3b27, deskTop=0x3a3e58,
+# sciany szafirowe
+C = dict(wall=0x1f4596, wallDark=0x1a3a80, base=0x1a1c2b, wood=0x8a5a3c, woodDark=0x5e3b27, deskTop=0x3a3e58,
          black=0x15161f, metal=0x8d93a8, white=0xeef0f6, cream=0xe9dfcc, purple=0x9b5cff, cyan=0x2de2e6, pink=0xff4fa3,
          warm=0xffc278, sofa=0x4b5577, sofaDark=0x3c4565, rug=0x3a3358, pot=0xd9cfc1, plant=0x3f8f5a)
 mWall = M("wall", C["wall"], 0.9); mWall2 = M("wallDark", C["wallDark"], 0.9); mBase = M("base", C["base"], 0.8)

@@ -3,7 +3,7 @@ import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.j
 
 // Paleta pokoju: grafit + drewno + fiolet/cyjan (neon) + ciepla lampa
 export const C = {
-  wall: 0x2b2f45, wallDark: 0x23263a, floor: 0x6b4a36, floorDark: 0x5a3d2c, base: 0x1a1c2b,
+  wall: 0x1f4596, wallDark: 0x1a3a80, floor: 0x6b4a36, floorDark: 0x5a3d2c, base: 0x1a1c2b,
   wood: 0x8a5a3c, woodDark: 0x5e3b27, desk: 0x2f3247, deskTop: 0x3a3e58,
   black: 0x15161f, metal: 0x8d93a8, white: 0xeef0f6, cream: 0xe9dfcc,
   purple: 0x9b5cff, cyan: 0x2de2e6, pink: 0xff4fa3, warm: 0xffc278,

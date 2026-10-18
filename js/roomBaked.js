@@ -1,12 +1,12 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
-import { C, mat, glow, box, sphere, group, canvasTexture } from "./util.js?v=20261018b";
-import * as S from "./screens.js?v=20261018b";
+import { C, mat, glow, box, sphere, group, canvasTexture } from "./util.js?v=20261018c";
+import * as S from "./screens.js?v=20261018c";
 
 // Pokoj z Blendera: statyczna geometria z wypalonym oswietleniem (noc / dzien) + elementy dynamiczne dokladane tutaj
 // (ekrany, neon, LED-y, lampki, hologram). Interfejs zwracanego obiektu jest taki sam jak w room.js.
-const BASE = "assets/room/"; const V = "?v=20261018b";   // znacznik wersji: wymusza swieze pliki po publikacji
+const BASE = "assets/room/"; const V = "?v=20261018c";   // znacznik wersji: wymusza swieze pliki po publikacji
 
 export function load(url, onProgress){
   const draco = new DRACOLoader(); draco.setDecoderPath("vendor/addons/libs/draco/gltf/");
@@ -162,7 +162,7 @@ export async function buildBakedRoom(scene, opts){
   R.anchors = {
     desk: new THREE.Vector3(-2.6, 1.95, -0.7), wall: new THREE.Vector3(-2.85, 2.6, 1.5), board: new THREE.Vector3(-0.5, 2.55, -2.85),
     console: new THREE.Vector3(1.6, 1.05, -2.6), shelf: new THREE.Vector3(-2.75, 2.55, -2.45),
-    tv: new THREE.Vector3(1.8, 2.45, -2.8)
+    tv: new THREE.Vector3(1.8, 2.45, -2.8), lamp: new THREE.Vector3(2.12, 1.95, 0.92)
   };
 
   R.update = function(dt, t, typing){

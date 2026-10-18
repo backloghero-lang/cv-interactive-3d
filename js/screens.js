@@ -1,4 +1,4 @@
-import { canvasTexture, roundRect } from "./util.js?v=20261018b";
+import { canvasTexture, roundRect } from "./util.js?v=20261018c";
 
 // ---------- wspolne ----------
 const FONT = "'Segoe UI', 'Inter', system-ui, sans-serif";
@@ -435,30 +435,29 @@ export function photoFrame(){
 }
 
 // ---------- napis neon ----------
-// Neon jak swiecaca rurka: szeroka kolorowa poswiata + kolorowy obrys + jasny rdzen.
+// Neon czytelny z daleka: pelne, grube litery z jasnym rdzeniem i kolorowa poswiata (kolor na kazde slowo).
 // Tekst jest skalowany do szerokosci plotna z marginesem, wiec nic nie jest uciete.
 export function neonText(text){
   const s = canvasTexture(2048, 400, function(ctx, w, h){
     ctx.clearRect(0, 0, w, h);
-    const parts = text.split(" "), colors = ["#2de2e6", "#c9a6ff", "#ff7ac4"];
-    let size = 200, font;
-    do { font = "italic 700 " + size + "px 'Segoe UI', 'Trebuchet MS', " + FONT; ctx.font = font; size -= 6; }
-    while(ctx.measureText(text).width > w * 0.86 && size > 40);
+    const parts = text.split(" "), colors = ["#2de2e6", "#c9a6ff", "#ff7ac4"], cores = ["#d8fdff", "#f1e8ff", "#ffe3f2"];
+    let size = 230, font;
+    do { font = "800 " + size + "px 'Segoe UI', 'Arial Rounded MT Bold', Arial, " + FONT; ctx.font = font; size -= 6; }
+    while(ctx.measureText(text).width > w * 0.9 && size > 40);
     ctx.textBaseline = "middle"; ctx.textAlign = "left"; ctx.lineJoin = "round";
-    const space = ctx.measureText(" ").width;
+    const space = ctx.measureText(" ").width * 0.8;
     const widths = parts.map(function(p){ return ctx.measureText(p).width; });
     let x = (w - (widths.reduce(function(a, b){ return a + b; }, 0) + space * (parts.length - 1))) / 2;
-    const y = h / 2 + 6;
+    const y = h / 2 + 8;
     parts.forEach(function(p, i){
       const c = colors[i % 3];
       ctx.save();
-      ctx.shadowColor = c; ctx.shadowBlur = 38; ctx.strokeStyle = c; ctx.lineWidth = 16; ctx.globalAlpha = 0.55; ctx.strokeText(p, x, y);
-      ctx.globalAlpha = 1; ctx.shadowBlur = 16; ctx.lineWidth = 8; ctx.strokeText(p, x, y);
-      ctx.shadowBlur = 0; ctx.lineWidth = 3; ctx.strokeStyle = "#ffffff"; ctx.strokeText(p, x, y);
+      ctx.shadowColor = c; ctx.shadowBlur = 22; ctx.fillStyle = c; ctx.fillText(p, x, y);   // poswiata
+      ctx.shadowBlur = 0; ctx.lineWidth = 8; ctx.strokeStyle = c; ctx.strokeText(p, x, y);   // kolorowa rurka
+      ctx.fillStyle = cores[i % 3]; ctx.fillText(p, x, y);                                  // jasny, ale kolorowy rdzen
       ctx.restore();
       x += widths[i] + space;
     });
-  });
-  s.tex.anisotropy = 8;
+  });  s.tex.anisotropy = 8;
   return s.tex;
 }

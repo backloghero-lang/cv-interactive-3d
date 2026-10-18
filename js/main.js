@@ -4,14 +4,14 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
-import { buildRoom } from "./room.js?v=20261018b";
-import { buildBakedRoom, load as loadModel } from "./roomBaked.js?v=20261018b";
-import { buildCharacter } from "./character.js?v=20261018b";
-import { buildDog } from "./dog.js?v=20261018b";
-import { createAudio } from "./audio.js?v=20261018b";
-import { TEXT, PROFILE } from "./content.js?v=20261018b";
-import { LOGOS } from "./screens.js?v=20261018b";
-import { ease, lerp } from "./util.js?v=20261018b";
+import { buildRoom } from "./room.js?v=20261018c";
+import { buildBakedRoom, load as loadModel } from "./roomBaked.js?v=20261018c";
+import { buildCharacter } from "./character.js?v=20261018c";
+import { buildDog } from "./dog.js?v=20261018c";
+import { createAudio } from "./audio.js?v=20261018c";
+import { TEXT, PROFILE } from "./content.js?v=20261018c";
+import { LOGOS } from "./screens.js?v=20261018c";
+import { ease, lerp } from "./util.js?v=20261018c";
 
 const $ = function(id){ return document.getElementById(id); };
 const touch = window.matchMedia("(pointer: coarse)").matches;
@@ -97,9 +97,22 @@ function makePins(){
     b.addEventListener("click", function(e){ e.stopPropagation(); focus(key); });
     layer.appendChild(b); pins[key] = b;
   });
+  // lampa: taki sam znacznik, ale klikniecie tylko ja zapala/gasi (bez kamery i panelu)
+  if(R.lamp && R.anchors.lamp){
+    const b = document.createElement("button");
+    b.className = "pin pin-lamp"; b.type = "button"; b.dataset.key = "lamp";
+    b.innerHTML = '<span class="pin-dot"></span><span class="pin-label"></span>';
+    b.addEventListener("click", function(e){ e.stopPropagation(); setLamp(!lampOn); });
+    layer.appendChild(b); pins.lamp = b;
+  }
   updatePinLabels();
 }
-function updatePinLabels(){ Object.keys(pins).forEach(function(k){ pins[k].querySelector(".pin-label").textContent = T().hotspots[k]; pins[k].setAttribute("aria-label", T().hotspots[k]); }); }
+function updatePinLabels(){
+  Object.keys(pins).forEach(function(k){
+    const label = k === "lamp" ? (lampOn ? T().lampOff : T().lampOn) : T().hotspots[k];
+    pins[k].querySelector(".pin-label").textContent = label; pins[k].setAttribute("aria-label", label);
+  });
+}
 const tmpV = new THREE.Vector3();
 function placePins(){
   const w = canvas.clientWidth, h = canvas.clientHeight;
@@ -163,8 +176,8 @@ function closePanel(){ $("panel").classList.remove("open"); $("panel").setAttrib
 // ---------- lampa przy kanapie (zawsze noc; wlaczona/zgaszona) ----------
 // off = pokoj oswietlaja tylko neony, LED-y i ekrany; on = cieple swiatlo lampy. Wypalone swiatlo przechodzi plynnie.
 const MODES = {
-  off: { hemi: 0.45, sun: 0.3, sunColor: 0x8fa6ff, fill: 0.3, lamp: 2.4, neon: 3.2, tv: 1.8, bloom: 0.85, exposure: 1.2, neonGlow: 2.2, glowK: 1.2 },
-  on:  { hemi: 0.95, sun: 0.6, sunColor: 0xffd9b0, fill: 0.7, lamp: 1.6, neon: 2.2, tv: 1.2, bloom: 0.6, exposure: 1.2, neonGlow: 1.7, glowK: 0.95 }
+  off: { hemi: 0.45, sun: 0.3, sunColor: 0x8fa6ff, fill: 0.3, lamp: 2.4, neon: 3.2, tv: 1.8, bloom: 0.85, exposure: 1.2, neonGlow: 1.05, glowK: 1.2 },
+  on:  { hemi: 0.95, sun: 0.6, sunColor: 0xffd9b0, fill: 0.7, lamp: 1.6, neon: 2.2, tv: 1.2, bloom: 0.6, exposure: 1.2, neonGlow: 0.95, glowK: 0.95 }
 };
 let lampOn = true, modeK = 1, modeTarget = 1;
 const glowBase = new Map();
@@ -172,8 +185,7 @@ function setLamp(v){
   lampOn = v; modeTarget = v ? 1 : 0;
   document.body.classList.add("night");
   if(R.sky){ R.sky.mat.map = R.sky.night; R.sky.mat.needsUpdate = true; }
-  $("btnMode").classList.toggle("on", v);
-  $("btnMode").title = v ? T().lampOff : T().lampOn; $("btnMode").setAttribute("aria-label", $("btnMode").title);
+  if(pins.lamp){ pins.lamp.classList.toggle("off", !v); updatePinLabels(); }
 }
 function applyMode(){
   const a = MODES.off, b = MODES.on, k = modeK, L = R.lights;
@@ -222,7 +234,6 @@ function applyLang(){
   if(focused) $("panelBody").innerHTML = panelHtml(focused);
 }
 $("btnLang").addEventListener("click", function(){ lang = lang === "pl" ? "en" : "pl"; try{ localStorage.setItem("cv-lang", lang); }catch(e){} applyLang(); });
-$("btnMode").addEventListener("click", function(){ setLamp(!lampOn); });
 $("btnSound").addEventListener("click", function(){ const on = audio.toggle(); $("btnSound").classList.toggle("on", on); $("btnSound").textContent = on ? "🔊" : "🔈"; $("btnSound").title = on ? T().soundOn : T().soundOff; });
 $("panelClose").addEventListener("click", unfocus);
 window.addEventListener("keydown", function(e){
@@ -260,7 +271,7 @@ async function init(){
   await step(45);
   // postac i pies z Blendera (gdy plik sie nie wczyta - wersje z kodu)
   let actors = null;
-  if(R.baked){ try{ actors = (await loadModel("assets/room/actors.glb?v=20261018b")).scene; }catch(e){ console.warn("Brak modeli postaci", e); } }
+  if(R.baked){ try{ actors = (await loadModel("assets/room/actors.glb?v=20261018c")).scene; }catch(e){ console.warn("Brak modeli postaci", e); } }
   hero = buildCharacter(scene, R.seat, actors);
   await step(60);
   dog = buildDog(scene, R.dog, hero, actors);
