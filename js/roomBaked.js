@@ -1,12 +1,12 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
-import { C, mat, glow, box, sphere, group, canvasTexture } from "./util.js?v=20261018c";
-import * as S from "./screens.js?v=20261018c";
+import { C, mat, glow, box, sphere, group, canvasTexture } from "./util.js?v=20261018d";
+import * as S from "./screens.js?v=20261018d";
 
 // Pokoj z Blendera: statyczna geometria z wypalonym oswietleniem (noc / dzien) + elementy dynamiczne dokladane tutaj
 // (ekrany, neon, LED-y, lampki, hologram). Interfejs zwracanego obiektu jest taki sam jak w room.js.
-const BASE = "assets/room/"; const V = "?v=20261018c";   // znacznik wersji: wymusza swieze pliki po publikacji
+const BASE = "assets/room/"; const V = "?v=20261018d";   // znacznik wersji: wymusza swieze pliki po publikacji
 
 export function load(url, onProgress){
   const draco = new DRACOLoader(); draco.setDecoderPath("vendor/addons/libs/draco/gltf/");
@@ -57,7 +57,8 @@ export async function buildBakedRoom(scene, opts){
   const certs = [["AI Academy", "2026"], ["UML: Modelowanie Systemów", "2025"], ["T-SQL: MS SQL Server", "2024"], ["BPMN: Modelowanie Procesów", "2023"], ["Inżynieria Wymagań", "2023"]];
   const certAccents = ["#9b5cff", "#2de2e6", "#ff4fa3", "#3fe08a", "#ffb000"];
   certs.forEach(function(c, i){ setMat("CERT_" + i, basic(S.certificate(c[0], c[1], certAccents[i]), 0.95)); });
-  [["comarch", "Comarch", "2022 –"], ["aldi", "ALDI", "2021–22"], ["specjal", "SPECJAŁ", "2019–21"], ["komfort", "Komfort", "2019"], ["auchan", "Auchan", "2016–18"]]
+  // kolejnosc ramek na scianie: [gora srodek, gora lewa, gora prawa, dol lewa, dol prawa]
+  [["comarch", "Comarch", "2022 –"], ["aldi", "ALDI", "2021–22"], ["auchan", "Auchan", "2016–18"], ["komfort", "Komfort", "2019"], ["specjal", "SPECJAŁ", "2019–21"]]
     .forEach(function(p, i){ setMat("PHOTO_" + i, basic(S.companyPhoto(p[0], p[1], p[2]), 0.6)); });
   [["BOURBON\nHUNTERS", "#c98a3a", "#5a2a14"], ["POKERHOUSE\nTRAINER", "#1e7a4c", "#0b2e1d"], ["PRICE\nSHIFT", "#6a4bd8", "#22165a"]]
     .forEach(function(c, i){ setMat("CART_" + i, basic(S.cartridgeLabel(c[0], c[1], c[2]), 0.8)); });

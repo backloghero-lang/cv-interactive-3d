@@ -4,14 +4,14 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
-import { buildRoom } from "./room.js?v=20261018c";
-import { buildBakedRoom, load as loadModel } from "./roomBaked.js?v=20261018c";
-import { buildCharacter } from "./character.js?v=20261018c";
-import { buildDog } from "./dog.js?v=20261018c";
-import { createAudio } from "./audio.js?v=20261018c";
-import { TEXT, PROFILE } from "./content.js?v=20261018c";
-import { LOGOS } from "./screens.js?v=20261018c";
-import { ease, lerp } from "./util.js?v=20261018c";
+import { buildRoom } from "./room.js?v=20261018d";
+import { buildBakedRoom, load as loadModel } from "./roomBaked.js?v=20261018d";
+import { buildCharacter } from "./character.js?v=20261018d";
+import { buildDog } from "./dog.js?v=20261018d";
+import { createAudio } from "./audio.js?v=20261018d";
+import { TEXT, PROFILE } from "./content.js?v=20261018d";
+import { LOGOS } from "./screens.js?v=20261018d";
+import { ease, lerp } from "./util.js?v=20261018d";
 
 const $ = function(id){ return document.getElementById(id); };
 const touch = window.matchMedia("(pointer: coarse)").matches;
@@ -271,7 +271,7 @@ async function init(){
   await step(45);
   // postac i pies z Blendera (gdy plik sie nie wczyta - wersje z kodu)
   let actors = null;
-  if(R.baked){ try{ actors = (await loadModel("assets/room/actors.glb?v=20261018c")).scene; }catch(e){ console.warn("Brak modeli postaci", e); } }
+  if(R.baked){ try{ actors = (await loadModel("assets/room/actors.glb?v=20261018d")).scene; }catch(e){ console.warn("Brak modeli postaci", e); } }
   hero = buildCharacter(scene, R.seat, actors);
   await step(60);
   dog = buildDog(scene, R.dog, hero, actors);
