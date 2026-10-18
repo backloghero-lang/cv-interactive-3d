@@ -156,13 +156,19 @@ for n, (w, h, x, y) in {"wallB1": (0.4, 3.2, -2.8, 0), "wallB2": (4.6, 3.2, 0.7,
     rbox(n, w, h, 0.14, x, y, -3.07, mWall, 0.004, 1)
 rbox("wallL", 0.14, 3.2, 6.14, -3.07, 0, 0, mWall2, 0.004, 1)
 rbox("skirtB", 6.0, 0.1, 0.03, 0, 0, -2.99, mBlack, 0.01); rbox("skirtL", 0.03, 0.1, 6.0, -2.99, 0, 0, mBlack, 0.01)
-# okno: rama, parapet
-for n, (w, h, d, x, y, z) in {"winT": (1.06, 0.06, 0.2, -2.1, 2.42, -3.0), "winB": (1.06, 0.06, 0.2, -2.1, 1.12, -3.0), "winL": (0.06, 1.3, 0.2, -2.6, 1.15, -3.0),
-                               "winR": (0.06, 1.3, 0.2, -1.6, 1.15, -3.0), "winV": (0.03, 1.3, 0.05, -2.1, 1.15, -3.0), "winH": (1.0, 0.03, 0.05, -2.1, 1.78, -3.0)}.items():
-    rbox(n, w, h, d, x, y, z, mWhite, 0.012)
-rbox("sill", 1.2, 0.05, 0.26, -2.1, 1.08, -2.9, mCream, 0.015)
-cyl("cactusPot", 0.06, 0.05, 0.1, -1.85, 1.13, -2.88, mPot, bevel=0.01)
-rbox("cactus", 0.07, 0.16, 0.07, -1.85, 1.22, -2.88, M("cactus", C["plant"], 0.7), 0.03, 4, 1)
+# okno: nowoczesna, ciemna rama osadzona w glebi muru, drewniany parapet i zaslony; za oknem zawsze noc (SKY)
+mFrame = M("winFrame", 0x1c1e2c, 0.4, 0.3)
+for n, (w, h, x, y) in {"winT": (1.0, 0.05, -2.1, 2.4), "winB": (1.0, 0.05, -2.1, 1.15), "winL": (0.05, 1.3, -2.575, 1.15), "winR": (0.05, 1.3, -1.625, 1.15)}.items():
+    rbox(n, w, h, 0.07, x, y, -3.1, mFrame, 0.01)
+rbox("winV", 0.025, 1.22, 0.04, -2.1, 1.19, -3.1, mFrame, 0.008)
+rbox("winH", 0.92, 0.025, 0.04, -2.1, 1.86, -3.1, mFrame, 0.008)
+rbox("winHandle", 0.02, 0.1, 0.03, -2.06, 1.62, -3.06, M("metal", C["metal"], 0.35, 0.6), 0.008)
+rbox("sill", 1.16, 0.045, 0.24, -2.1, 1.105, -2.97, mWood, 0.014)
+cyl("sillPot", 0.055, 0.045, 0.09, -1.82, 1.15, -2.92, mPot, bevel=0.01)
+sph("sillCandle", 0.03, -2.38, 1.18, -2.92, mCream)
+for i, x in enumerate((-2.72, -1.48)):   # miekkie zaslony po bokach okna
+    rbox("curtain%d" % i, 0.26, 2.15, 0.07, x, 0.62, -2.95, M("curtain", 0x3b3266, 0.95), 0.03, 3, 2)
+rbox("curtainRod", 1.6, 0.025, 0.025, -2.1, 2.8, -2.94, M("metal", C["metal"], 0.35, 0.6), 0.012)
 plane("SKY", 1.4, 1.6, -2.1, 1.8, -3.25, "+z")
 
 # dywan
@@ -284,18 +290,36 @@ for i, (px, pz) in enumerate([(-0.43, -0.22), (0.43, -0.22), (-0.43, 0.22), (0.4
 rbox("pad", 0.2, 0.04, 0.11, TX + 0.15, 0.43, TZ + 0.05, mBlack, 0.02, 4, 1, rot=(0, 0.4, 0))
 cyl("speaker", 0.05, 0.055, 0.09, TX - 0.3, 0.43, TZ - 0.08, M("speaker", 0x3a3e58, 0.5), bevel=0.02)
 
-# ---------------------------------------------------------------- barek + ramka cyfrowa
-BX, BZ = 2.6, -1.45
-mBrass = M("brass", 0xc9a050, 0.35, 0.6)
-for i, y in enumerate((0.08, 0.55)): rbox("cartShelf%d" % i, 0.5, 0.03, 0.42, BX, y, BZ, mWoodD, 0.012)
-for i, (px, pz) in enumerate([(-0.23, -0.19), (0.23, -0.19), (-0.23, 0.19), (0.23, 0.19)]): cyl("cartPost%d" % i, 0.012, 0.012, 0.6, BX + px, 0, BZ + pz, mBrass, segs=12)
-for i, col in enumerate([0x8a4b1d, 0x5a2a14, 0xa8682a, 0x3f6b3a]):
-    bx, bz = BX - 0.17 + i * 0.11, BZ + (0.06 if i % 2 else -0.06)
-    cyl("bottle%d" % i, 0.04, 0.04, 0.22, bx, 0.58, bz, M("bottle%d" % i, col, 0.15, 0.1), bevel=0.012)
-    cyl("bottleNeck%d" % i, 0.014, 0.03, 0.06, bx, 0.8, bz, M("bottle%d" % i, col, 0.15, 0.1))
-    cyl("bottleCap%d" % i, 0.015, 0.015, 0.03, bx, 0.86, bz, mBlack)
-rbox("frameBody", 0.46, 0.36, 0.035, BX + 0.02, 1.0, BZ - 0.12, mBlack, 0.015, rot=(0, -0.6, 0))
-p = plane("SCREEN_frame", 0.42, 0.31, BX + 0.02 + 0.02 * math.sin(-0.6), 1.18, BZ - 0.12 + 0.02 * math.cos(-0.6), "+z"); p.rotation_euler[2] = -0.6
+# ---------------------------------------------------------------- lampa lukowa przy kanapie (wlaczana na stronie)
+LX, LZ = 2.66, 0.62
+LAMP_HEAD = (2.12, 1.62, 0.92)      # srodek klosza (three)
+mLampMetal = M("lampMetal", 0x2a2c3a, 0.35, 0.7)
+cyl("lampBase", 0.17, 0.18, 0.035, LX, 0, LZ, mLampMetal, bevel=0.012)
+cyl("lampPole", 0.016, 0.016, 1.35, LX, 0.03, LZ, mLampMetal, segs=16)
+cu = bpy.data.curves.new("lampArc", "CURVE"); cu.dimensions = "3D"; cu.bevel_depth = 0.014; cu.bevel_resolution = 4
+sp_ = cu.splines.new("BEZIER"); sp_.bezier_points.add(1)
+p0, p1 = sp_.bezier_points
+p0.co = V(LX, 1.38, LZ); p0.handle_left = V(LX, 1.2, LZ); p0.handle_right = V(LX, 1.75, LZ)
+p1.co = V(LAMP_HEAD[0], LAMP_HEAD[1] + 0.12, LAMP_HEAD[2]); p1.handle_left = V(LAMP_HEAD[0] + 0.25, LAMP_HEAD[1] + 0.32, LAMP_HEAD[2] - 0.1); p1.handle_right = V(LAMP_HEAD[0] - 0.1, LAMP_HEAD[1], LAMP_HEAD[2])
+arc = bpy.data.objects.new("lampArc", cu); arc.data.materials.append(mLampMetal); link(arc)
+bpy.ops.mesh.primitive_uv_sphere_add(segments=40, ring_count=20, radius=0.17, location=V(*LAMP_HEAD))
+shade = bpy.context.active_object; shade.name = "lampShade"; shade.scale = (1, 1, 0.62)
+bm = bmesh.new(); bm.from_mesh(shade.data)
+bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z < -0.02], context="VERTS"); bm.to_mesh(shade.data); bm.free()
+sol = shade.modifiers.new("solid", "SOLIDIFY"); sol.thickness = 0.012
+shade.data.materials.append(M("lampShade", 0xf1e6d2, 0.6))
+for p in shade.data.polygons: p.use_smooth = True
+STATIC.append(shade)
+sph("lampBulb", 0.045, LAMP_HEAD[0], LAMP_HEAD[1] - 0.02, LAMP_HEAD[2], M("bulb", 0xfff4dc, 0.3))
+
+# ---------------------------------------------------------------- legowisko psa (miedzy biurkiem a roslina)
+DBX, DBZ = -2.42, 1.2
+bpy.ops.mesh.primitive_torus_add(major_radius=0.3, minor_radius=0.1, major_segments=48, minor_segments=20, location=V(DBX, 0.09, DBZ))
+bed = bpy.context.active_object; bed.name = "dogBed"; bed.scale = (1, 1.15, 0.85); bed.data.materials.append(M("dogBed", 0x5b4b8a, 0.95))
+for p in bed.data.polygons: p.use_smooth = True
+STATIC.append(bed)
+cyl("dogBedCushion", 0.3, 0.3, 0.07, DBX, 0.0, DBZ, M("dogCushion", 0xe2d6c3, 0.95), segs=48, bevel=0.03)
+rbox("dogToy", 0.12, 0.04, 0.04, DBX + 0.32, 0.0, DBZ - 0.32, M("toy", 0xff4fa3, 0.6), 0.02, 4, 1, rot=(0, 0.6, 0))
 
 # ---------------------------------------------------------------- miska psa pod kwiatkiem
 rbox("bowlMat", 0.5, 0.012, 0.3, 0.04, 0, -2.64, M("bowlMat", 0xd9cfc1, 0.9), 0.005)
@@ -369,6 +393,32 @@ def world(color, strength):
     bg = w.node_tree.nodes["Background"]; bg.inputs["Color"].default_value = hexcol(color); bg.inputs["Strength"].default_value = strength
     scene.world = w
 
+def common_night(k):
+    """Swiatla nocne wspolne dla obu wersji (k = sila; przy zgaszonej lampie LED-y i ekrany sa wyrazniejsze)."""
+    area("ledDesk", 120 * k, 0x9b5cff, 1.6, -2.85, 1.6, -0.7, -3.1, 1.6, -0.7, sy=0.25)
+    area("ledTv", 300 * k, 0x2de2e6, 1.7, 1.8, 1.67, -2.9, 1.8, 1.67, -3.3, sy=0.9)
+    area("tvGlow", 70 * k, 0x8fe9ff, 1.6, 1.8, 1.65, -2.75, 1.8, 0.8, 0.5, sy=0.9)
+    area("screens", 35 * k, 0xbcd8ff, 0.8, -2.65, 1.25, -0.6, -1.5, 1.0, -0.6, sy=0.5)
+    area("neon", 55 * k, 0xd28cff, 2.0, -2.9, 2.45, -0.7, -1.0, 2.0, -0.7, sy=0.3)
+    area("shelfLed", 45 * k, 0x2de2e6, 0.8, -2.55, 1.1, -2.45, -2.9, 1.1, -2.45, sy=2.0)
+    point("deskLamp", 25, 0xffb46b, 0.08, -2.62, 1.18, 0.2)
+    area("moon", 140, 0x8fa6ff, 1.0, -2.1, 1.8, -3.6, -1.5, 0.0, -1.0, sy=1.3)
+
+def lights_on():
+    """Lampa przy kanapie wlaczona: cieple, przytulne swiatlo w calym pokoju."""
+    world(0x1a1d3a, 0.3)
+    common_night(1.0)
+    point("floorLamp", 160, 0xffc58a, 0.12, LAMP_HEAD[0], LAMP_HEAD[1] - 0.06, LAMP_HEAD[2])
+    area("lampDown", 140, 0xffc58a, 0.5, LAMP_HEAD[0], LAMP_HEAD[1] - 0.1, LAMP_HEAD[2], LAMP_HEAD[0], 0, LAMP_HEAD[2])
+    area("keyWarm", 220, 0xffd2a1, 2.8, 0.6, 3.6, 0.6, 0.4, 0, 0.0, sy=2.8)
+    area("fill", 180, 0x9aa8ff, 4.0, 5, 4, 5, 0, 1, 0)
+
+def lights_off():
+    """Lampa zgaszona: pokoj oswietlaja tylko neony, LED-y, ekrany, lampka na biurku i ksiezyc."""
+    world(0x141733, 0.22)
+    common_night(1.5)
+    area("fill", 70, 0x8a96e8, 4.0, 5, 4, 5, 0, 1, 0)
+
 def lights_night():
     world(0x1a1d3a, 0.35)
     area("keyWarm", 520, 0xffd2a1, 2.8, 0.6, 3.6, 0.6, 0.4, 0, 0.0, sy=2.8)                 # cieple swiatlo z gory (sufit)
@@ -414,7 +464,7 @@ def preview(path):
 def build_baked_mesh():
     for o in STATIC: apply_modifiers(o) if o.type == "MESH" and o.modifiers else None
     bpy.ops.object.select_all(action="DESELECT")
-    meshes = [o for o in STATIC if o.type == "MESH"]
+    meshes = [o for o in STATIC if o.type in ("MESH", "CURVE")]   # krzywe (luk lampy) zamieniane na siatke
     for o in meshes: o.select_set(True)
     bpy.context.view_layer.objects.active = meshes[0]
     bpy.ops.object.make_single_user(object=True, obdata=True)
@@ -529,12 +579,13 @@ def glow_placeholders():
 
 # ---------------------------------------------------------------- przebieg
 glow_placeholders()
+LIGHTS = {"on": lights_on, "off": lights_off, "night": lights_night, "day": lights_day}
 if PREVIEW:
-    lights_night(); preview(PREVIEW)
+    LIGHTS[arg("--preview-light", "on")](); preview(PREVIEW)
 if BAKE != "none":
     room = build_baked_mesh()
-    for label in (["night", "day"] if BAKE == "both" else [BAKE]):
-        clear_lights(); (lights_night if label == "night" else lights_day)()
+    for label in (["on", "off"] if BAKE == "both" else [BAKE]):
+        clear_lights(); LIGHTS[label]()
         bake(room, label)
     export(room)
 print("DONE")

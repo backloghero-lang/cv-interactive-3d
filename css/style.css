@@ -101,3 +101,4 @@ body.night{background:radial-gradient(120% 90% at 30% 20%, #241c4f 0%, #0e0b24 5
 .og .tools,.og .pins,.og .hint,.og .text-link{display:none}
 .og .brand{opacity:1;transform:none;transition:none}
 @media (prefers-reduced-motion:reduce){ .pin::before{animation:none} }
+#btnMode:not(.on){filter:grayscale(1);opacity:.6}

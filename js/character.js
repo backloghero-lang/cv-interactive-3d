@@ -24,7 +24,31 @@ function plaid(){
 }
 
 // Postac w lokalnym ukladzie patrzy w -z; cala grupa obrocona tak, by patrzyla w sciane z monitorami (-x).
-export function buildCharacter(scene, seat){
+// model z Blendera (blender/build_actors.py): gladkie bryly z punktami obrotu o tych samych nazwach i polozeniach
+function fromModel(model){
+  const root = model.getObjectByName("CHAR_root");
+  if(!root) return null;
+  const shirt = plaid();
+  root.traverse(function(o){
+    if(!o.isMesh) return;
+    o.castShadow = true; o.receiveShadow = true;
+    if(/^shirt/i.test(o.name)) o.material = shirt;
+    else if(o.material){ o.material.roughness = Math.max(0.5, o.material.roughness); o.material.metalness = 0; }
+  });
+  const arms = [["L", -1], ["R", 1]].map(function(s){
+    return { side: s[1], shoulder: root.getObjectByName("pv_shoulder_" + s[0]), elbow: root.getObjectByName("pv_elbow_" + s[0]), hand: root.getObjectByName("pv_hand_" + s[0]) };
+  });
+  return { root: root, torso: root.getObjectByName("pv_torso"), head: root.getObjectByName("pv_head"), arms: arms };
+}
+
+export function buildCharacter(scene, seat, model){
+  const M = model ? fromModel(model) : null;
+  if(M){
+    scene.add(M.root);
+    M.root.position.set(seat.x, 0, seat.z); M.root.rotation.set(0, Math.PI / 2, 0);
+    M.torso.rotation.x = -0.14;
+    return animate(M.root, M.torso, M.head, M.arms);
+  }
   const root = new THREE.Group();
   root.position.set(seat.x, 0, seat.z);
   root.rotation.y = Math.PI / 2;
@@ -74,8 +98,11 @@ export function buildCharacter(scene, seat){
     part(0.09, 0.09, 0.05, skin, hand, 0, -0.03, 0, 0.025);
     arms.push({ side: side, shoulder: shoulder, elbow: elbow, hand: hand });
   });
+  return animate(root, torso, head, arms);
+}
 
-  // ---------- animacja ----------
+// ---------- animacja (wspolna dla modelu z Blendera i wersji z kodu) ----------
+function animate(root, torso, head, arms){
   const A = { mode: "type", timer: 0, look: 0, lookTarget: 0, pitch: 0, pitchTarget: 0, dogNear: false, click: 0 };
   function schedule(){
     // co kilka sekund: mysz, zerkniecie na drugi monitor albo dalej pisanie

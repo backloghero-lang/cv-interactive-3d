@@ -8,7 +8,7 @@ import * as S from "./screens.js";
 // (ekrany, neon, LED-y, lampki, hologram). Interfejs zwracanego obiektu jest taki sam jak w room.js.
 const BASE = "assets/room/";
 
-function load(url, onProgress){
+export function load(url, onProgress){
   const draco = new DRACOLoader(); draco.setDecoderPath("vendor/addons/libs/draco/gltf/");
   const loader = new GLTFLoader(); loader.setDRACOLoader(draco);
   return new Promise(function(res, rej){ loader.load(url, res, onProgress, rej); });
@@ -32,10 +32,10 @@ function bakedMaterial(night, day){
 export async function buildBakedRoom(scene, opts){
   const R = { anim: [], screens: {}, anchors: {}, lights: {}, glowMats: [], dog: {}, seat: { x: -1.95, y: 0.54, z: -0.72 }, baked: true };
   const progress = opts.onProgress || function(){};
-  const [gltf, props, night, day] = await Promise.all([
+  const [gltf, props, lampOn, lampOff] = await Promise.all([
     load(BASE + "room.glb", function(e){ if(e.total) progress(e.loaded / e.total); }),
     load(BASE + "props.glb").catch(function(){ return null; }),
-    tex(BASE + "bake_night.jpg"), tex(BASE + "bake_day.jpg")
+    tex(BASE + "bake_on.jpg"), tex(BASE + "bake_off.jpg")
   ]);
   const room = gltf.scene; scene.add(room);
   const named = {};
@@ -43,7 +43,7 @@ export async function buildBakedRoom(scene, opts){
 
   // ---------- statyczny pokoj z wypalonym swiatlem ----------
   const baked = named.ROOM_BAKED;
-  R.bakedMat = bakedMaterial(night, day);
+  R.bakedMat = bakedMaterial(lampOn, lampOff);   // (mapB, mapA): mixK 1 = lampa wlaczona, 0 = zgaszona
   if(baked) baked.material = R.bakedMat;
 
   // ---------- plaszczyzny dynamiczne ----------
@@ -53,7 +53,6 @@ export async function buildBakedRoom(scene, opts){
   R.screens.main = S.mainMonitor(); setMat("SCREEN_main", basic(R.screens.main.tex, 0.9));
   R.screens.side = S.sideMonitor(); setMat("SCREEN_side", basic(R.screens.side.tex, 0.9));
   R.screens.tv = S.tvScreen(opts.getLang); setMat("SCREEN_tv", basic(R.screens.tv.tex, 0.95));
-  R.screens.frame = S.photoFrame(); setMat("SCREEN_frame", basic(R.screens.frame.tex, 1.05));
   R.screens.board = S.skillsBoard(); setMat("BOARD", basic(R.screens.board.tex, 0.62));
   const certs = [["AI Academy", "2026"], ["UML: Modelowanie Systemów", "2025"], ["T-SQL: MS SQL Server", "2024"], ["BPMN: Modelowanie Procesów", "2023"], ["Inżynieria Wymagań", "2023"]];
   const certAccents = ["#9b5cff", "#2de2e6", "#ff4fa3", "#3fe08a", "#ffb000"];
@@ -79,7 +78,7 @@ export async function buildBakedRoom(scene, opts){
     for(let i = 0; i < 9; i++){ const bh = 40 + (i * 37) % 70; ctx.fillStyle = "#151832"; ctx.fillRect(i * 30, h - bh, 26, bh); ctx.fillStyle = "#ffd36b"; for(let k = 0; k < 4; k++) if((i + k) % 3) ctx.fillRect(i * 30 + 5 + (k % 2) * 10, h - bh + 8 + Math.floor(k / 2) * 14, 5, 6); }
   });
   skyDay.tex.flipY = false; skyNight.tex.flipY = false;
-  const skyMat = new THREE.MeshBasicMaterial({ map: skyDay.tex });
+  const skyMat = new THREE.MeshBasicMaterial({ map: skyNight.tex });   // za oknem zawsze noc
   setMat("SKY", skyMat);
   R.sky = { mat: skyMat, day: skyDay.tex, night: skyNight.tex };
 
@@ -137,6 +136,15 @@ export async function buildBakedRoom(scene, opts){
   sphere(0.014, glow(C.purple, 2), 1.4, 0.48, -0.5, fx, 10); sphere(0.014, glow(C.cyan, 2), 1.5, 0.48, -0.47, fx, 10);
   const spk = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.006, 8, 32), glow(C.cyan, 1.6)); spk.rotation.x = Math.PI / 2; spk.position.set(1.0, 0.525, -0.63); fx.add(spk);
 
+  // ---------- lampa lukowa przy kanapie: swiecaca zarowka + swiatlo dla postaci i psa; klikalna ----------
+  const LAMP = new THREE.Vector3(2.12, 1.6, 0.92);
+  const bulbM = glow(C.warm, 4); 
+  const bulb = sphere(0.05, bulbM, LAMP.x, LAMP.y - 0.02, LAMP.z, fx, 16); bulb.castShadow = false;
+  const lampLight = new THREE.PointLight(0xffc58a, 2.2, 5, 1.4); lampLight.position.copy(LAMP).add(new THREE.Vector3(0, -0.15, 0)); scene.add(lampLight);
+  const lampHit = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 1.9, 12), new THREE.MeshBasicMaterial({ visible: false }));
+  lampHit.position.set(2.45, 0.95, 0.75); scene.add(lampHit);
+  R.lamp = { bulb: bulbM, light: lampLight, hit: lampHit };
+
   // ---------- swiatla czasu rzeczywistego (tylko dla postaci, psa i roslin) ----------
   const hemi = new THREE.HemisphereLight(0xbfc8ff, 0x5a3a2a, 1.0); scene.add(hemi);
   const sun = new THREE.DirectionalLight(0xfff1dc, 1.6); sun.position.set(-4.5, 7, -6.5); scene.add(sun);
@@ -150,16 +158,17 @@ export async function buildBakedRoom(scene, opts){
   R.dog.sofa = new THREE.Vector3(1.52, 0.47, 0.97);
   R.dog.bowl = new THREE.Vector3(-0.07, 0, -2.66);
   R.dog.owner = new THREE.Vector3(-1.5, 0, -0.2);
+  R.dog.bed = new THREE.Vector3(-2.42, 0.07, 1.2);
   R.anchors = {
     desk: new THREE.Vector3(-2.6, 1.95, -0.7), wall: new THREE.Vector3(-2.85, 2.6, 1.5), board: new THREE.Vector3(-0.5, 2.55, -2.85),
-    console: new THREE.Vector3(1.6, 1.05, -2.6), shelf: new THREE.Vector3(-2.75, 2.55, -2.45), hobby: new THREE.Vector3(2.6, 1.55, -1.45),
+    console: new THREE.Vector3(1.6, 1.05, -2.6), shelf: new THREE.Vector3(-2.75, 2.55, -2.45),
     tv: new THREE.Vector3(1.8, 2.45, -2.8)
   };
 
   R.update = function(dt, t, typing){
     R.anim.forEach(function(f){ f(dt, t); });
     R.screens.main.update(dt, typing); R.screens.side.update(dt); R.screens.tv.update(dt);
-    R.screens.frame.update(dt); R.screens.board.update(dt);
+    R.screens.board.update(dt);
   };
   return R;
 }

@@ -16,20 +16,19 @@ Pokój gracza-analityka w 3D. Przeciągnij, aby się rozejrzeć (na telefonie ta
 |---|---|
 | Stanowisko pracy | kontakt i krótkie podsumowanie, przycisk „Pobierz CV (PDF)” |
 | Ściana zdjęć | historia firm: Comarch, ALDI, SPECJAŁ, Komfort, Auchan |
-| Telewizor | serwis giełdowy z prezenterką (Comarch rośnie razem z big techami) |
 | Tablica | umiejętności analityka |
 | Konsola | projekty jako kartridże: Bourbon Hunters, PokerHouse Trainer, PriceShift |
 | Regał | certyfikaty i wykształcenie |
-| Barek i ramka | hobby: podróże, eventy, whisky |
 
-Postać pisze przy dwóch animowanych monitorach (zgłoszenie w Jira, SQL, logi API), a beagle krąży między kanapą, miską i panem.
+Postać pisze przy dwóch animowanych monitorach (zgłoszenie w Jira, SQL, logi API), w telewizorze leci serwis giełdowy, a beagle krąży między kanapą, legowiskiem, miską i panem. Lampę przy kanapie można zapalić i zgasić (przycisk 💡 albo kliknięcie w lampę), żeby zobaczyć, jak świecą neony, LED-y i ekrany.
 </details>
 
 <details>
 <summary><strong>🛠️ Technologie</strong></summary>
 
-- **Three.js** (WebGL) z bloomem dla neonów, cieniami i trybem dzień/noc — bez zewnętrznych modeli: pokój, postać i pies modelowane w kodzie.
-- **Ekrany jako tekstury canvas** rysowane na żywo (monitory, TV, ramka ze zdjęciami).
+- **Blender** (skrypty w `blender/`): pokój, postać i pies modelowane skryptem, oświetlenie liczone w Cycles i zapisane w teksturach (lampa zapalona / zgaszona), eksport glTF z kompresją Draco.
+- **Three.js** (WebGL): wczytuje model, dokłada animacje i bloom dla neonów; rośliny i lampka biurkowa z Poly Haven (CC0).
+- **Ekrany jako tekstury canvas** rysowane na żywo (monitory, TV, tablica, certyfikaty).
 - **Dźwięki syntezowane WebAudio** (ambient, klawiatura) — bez plików audio.
 - **PL / EN**, wersja tekstowa i PDF generowane z jednego źródła treści (`js/content.js`).
 - Czysty HTML/CSS/JS bez kroku budowania, hosting na **GitHub Pages**.

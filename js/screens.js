@@ -150,37 +150,63 @@ export function tvScreen(getLang){
   let t = 0;
   const sparks = STOCKS.map(function(st, i){ return spark(i + 1, st.ch > 0); });
   function reporter(ctx, talk){
-    const x = 210, y = 300;
-    // studio za prezenterka
-    ctx.fillStyle = "rgba(45,226,230,.08)"; ctx.beginPath(); ctx.arc(x, y - 30, 170, 0, 7); ctx.fill();
-    // wlosy (tyl)
-    ctx.fillStyle = "#4a2c1d"; ctx.beginPath(); ctx.ellipse(x, y - 70, 74, 92, 0, 0, 7); ctx.fill();
-    ctx.fillRect(x - 74, y - 70, 148, 120);
-    // szyja + zakiet
-    ctx.fillStyle = "#e2a985"; ctx.fillRect(x - 18, y - 10, 36, 40);
-    ctx.fillStyle = "#2a3d7c"; ctx.beginPath(); ctx.moveTo(x - 120, y + 160); ctx.quadraticCurveTo(x - 110, y + 30, x - 30, y + 22); ctx.lineTo(x + 30, y + 22); ctx.quadraticCurveTo(x + 110, y + 30, x + 120, y + 160); ctx.fill();
-    ctx.fillStyle = "#f1f1f6"; ctx.beginPath(); ctx.moveTo(x - 30, y + 22); ctx.lineTo(x, y + 80); ctx.lineTo(x + 30, y + 22); ctx.fill();
-    // twarz
-    ctx.fillStyle = "#efbc98"; ctx.beginPath(); ctx.ellipse(x, y - 62, 56, 68, 0, 0, 7); ctx.fill();
-    // grzywka
-    ctx.fillStyle = "#4a2c1d"; ctx.beginPath(); ctx.ellipse(x - 14, y - 118, 62, 30, -0.25, 0, 7); ctx.fill();
-    // oczy (mruganie)
+    const x = 215, y = 290;
+    // poswiata studia za prezenterka
+    const halo = ctx.createRadialGradient(x, y - 40, 20, x, y - 40, 200); halo.addColorStop(0, "rgba(45,226,230,.22)"); halo.addColorStop(1, "rgba(45,226,230,0)");
+    ctx.fillStyle = halo; ctx.fillRect(x - 220, y - 260, 440, 440);
+    // wlosy z tylu (dlugie, cieniowane)
+    const hairG = ctx.createLinearGradient(x - 90, y - 160, x + 90, y + 60); hairG.addColorStop(0, "#6b3a22"); hairG.addColorStop(1, "#3a1d10");
+    ctx.fillStyle = hairG;
+    ctx.beginPath(); ctx.moveTo(x - 78, y - 70); ctx.quadraticCurveTo(x - 100, y - 170, x, y - 168); ctx.quadraticCurveTo(x + 100, y - 170, x + 80, y - 70);
+    ctx.quadraticCurveTo(x + 96, y + 20, x + 70, y + 70); ctx.lineTo(x - 70, y + 70); ctx.quadraticCurveTo(x - 96, y + 20, x - 78, y - 70); ctx.fill();
+    // szyja z cieniem
+    ctx.fillStyle = "#e0a582"; ctx.fillRect(x - 20, y - 14, 40, 46);
+    ctx.fillStyle = "rgba(120,60,40,.25)"; ctx.fillRect(x - 20, y - 14, 40, 12);
+    // zakiet z klapami, bluzka, mikrofon
+    const jG = ctx.createLinearGradient(0, y + 20, 0, y + 170); jG.addColorStop(0, "#2f4a9a"); jG.addColorStop(1, "#1d2f6b");
+    ctx.fillStyle = jG; ctx.beginPath(); ctx.moveTo(x - 130, y + 175); ctx.quadraticCurveTo(x - 128, y + 40, x - 34, y + 24); ctx.lineTo(x + 34, y + 24); ctx.quadraticCurveTo(x + 128, y + 40, x + 130, y + 175); ctx.fill();
+    ctx.fillStyle = "#f4f2fa"; ctx.beginPath(); ctx.moveTo(x - 28, y + 24); ctx.lineTo(x, y + 92); ctx.lineTo(x + 28, y + 24); ctx.fill();
+    ctx.fillStyle = "#263d86";
+    ctx.beginPath(); ctx.moveTo(x - 34, y + 24); ctx.lineTo(x - 6, y + 104); ctx.lineTo(x - 46, y + 70); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + 34, y + 24); ctx.lineTo(x + 6, y + 104); ctx.lineTo(x + 46, y + 70); ctx.fill();
+    ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(x - 40, y + 70, 6, 0, 7); ctx.fill();
+    // twarz (owal z cieniowaniem)
+    const fG = ctx.createRadialGradient(x - 14, y - 80, 10, x, y - 60, 80); fG.addColorStop(0, "#f7cfb2"); fG.addColorStop(1, "#e3a985");
+    ctx.fillStyle = fG; ctx.beginPath(); ctx.ellipse(x, y - 62, 54, 68, 0, 0, 7); ctx.fill();
+    // uszy i kolczyki
+    ctx.fillStyle = "#e3a985"; ctx.beginPath(); ctx.ellipse(x - 54, y - 58, 9, 14, 0, 0, 7); ctx.ellipse(x + 54, y - 58, 9, 14, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = "#f2cf6b"; ctx.beginPath(); ctx.arc(x - 55, y - 40, 5, 0, 7); ctx.arc(x + 55, y - 40, 5, 0, 7); ctx.fill();
+    // grzywka zaczesana na bok
+    ctx.fillStyle = hairG; ctx.beginPath(); ctx.moveTo(x - 58, y - 70); ctx.quadraticCurveTo(x - 60, y - 140, x + 10, y - 132); ctx.quadraticCurveTo(x + 66, y - 126, x + 58, y - 78);
+    ctx.quadraticCurveTo(x + 30, y - 112, x - 20, y - 104); ctx.quadraticCurveTo(x - 46, y - 96, x - 58, y - 70); ctx.fill();
+    ctx.strokeStyle = "rgba(255,210,170,.25)"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x - 30, y - 128); ctx.quadraticCurveTo(x + 10, y - 134, x + 40, y - 118); ctx.stroke();
+    // brwi
+    ctx.strokeStyle = "#4a2716"; ctx.lineWidth = 4; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(x - 36, y - 88); ctx.quadraticCurveTo(x - 22, y - 96, x - 9, y - 89); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 9, y - 89); ctx.quadraticCurveTo(x + 22, y - 96, x + 36, y - 88); ctx.stroke();
+    // oczy: bialko, teczowka, zrenica, odblask, rzesy (mruganie)
     const blink = (Math.floor(t * 10) % 37) === 0;
-    ctx.fillStyle = "#2b1d18";
-    if(blink){ ctx.fillRect(x - 28, y - 70, 16, 3); ctx.fillRect(x + 12, y - 70, 16, 3); }
-    else { ctx.beginPath(); ctx.ellipse(x - 20, y - 68, 6, 8, 0, 0, 7); ctx.ellipse(x + 20, y - 68, 6, 8, 0, 0, 7); ctx.fill(); }
+    [-22, 22].forEach(function(dx){
+      if(blink){ ctx.strokeStyle = "#3a1d10"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x + dx - 11, y - 70); ctx.quadraticCurveTo(x + dx, y - 64, x + dx + 11, y - 70); ctx.stroke(); return; }
+      ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.ellipse(x + dx, y - 70, 12, 8, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = "#6b4226"; ctx.beginPath(); ctx.arc(x + dx + 1, y - 70, 6.5, 0, 7); ctx.fill();
+      ctx.fillStyle = "#1a0f08"; ctx.beginPath(); ctx.arc(x + dx + 1, y - 70, 3, 0, 7); ctx.fill();
+      ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(x + dx + 3, y - 73, 1.8, 0, 7); ctx.fill();
+      ctx.strokeStyle = "#2a150b"; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.ellipse(x + dx, y - 70, 12.5, 8.5, 0, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+    });
+    // nos, rumience
+    ctx.strokeStyle = "rgba(150,80,55,.55)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + 2, y - 62); ctx.quadraticCurveTo(x + 7, y - 44, x - 3, y - 42); ctx.stroke();
+    ctx.fillStyle = "rgba(240,120,120,.22)"; ctx.beginPath(); ctx.ellipse(x - 32, y - 46, 12, 7, 0, 0, 7); ctx.ellipse(x + 32, y - 46, 12, 7, 0, 0, 7); ctx.fill();
     // usta - mowi
-    const open = talk ? 3 + Math.abs(Math.sin(t * 13)) * 9 : 3;
-    ctx.fillStyle = "#b8504f"; ctx.beginPath(); ctx.ellipse(x, y - 28, 14, open / 2 + 2, 0, 0, 7); ctx.fill();
-    // kolczyki
-    ctx.fillStyle = "#f2cf6b"; ctx.beginPath(); ctx.arc(x - 56, y - 50, 5, 0, 7); ctx.arc(x + 56, y - 50, 5, 0, 7); ctx.fill();
+    const open = talk ? 2 + Math.abs(Math.sin(t * 12)) * 7 : 2;
+    ctx.fillStyle = "#c2565a"; ctx.beginPath(); ctx.moveTo(x - 15, y - 28); ctx.quadraticCurveTo(x, y - 34, x + 15, y - 28); ctx.quadraticCurveTo(x, y - 26 + open, x - 15, y - 28); ctx.fill();
+    if(open > 4){ ctx.fillStyle = "#5a1f22"; ctx.beginPath(); ctx.ellipse(x, y - 27 + open * 0.35, 9, open * 0.35, 0, 0, 7); ctx.fill(); }
     // blat studia
     ctx.fillStyle = grad(ctx, 0, y + 100, 0, H, [[0, "#1d2a55"], [1, "#0d1430"]]);
     ctx.fillRect(40, y + 100, 360, 160);
     ctx.fillStyle = "#2de2e6"; ctx.fillRect(40, y + 100, 360, 4);
     ctx.fillStyle = "#ffffff"; ctx.font = "800 22px " + FONT; ctx.textAlign = "center"; ctx.fillText("TECH MARKETS", 220, y + 140); ctx.textAlign = "left";
-  }
-  function draw(){
+  }  function draw(){
     const ctx = s.ctx, lang = getLang();
     const slot = 4.5, idx = Math.floor(t / slot) % STOCKS.length, local = (t % slot) / slot;
     const st = STOCKS[idx], up = st.ch > 0;

@@ -5,7 +5,7 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { buildRoom } from "./room.js";
-import { buildBakedRoom } from "./roomBaked.js";
+import { buildBakedRoom, load as loadModel } from "./roomBaked.js";
 import { buildCharacter } from "./character.js";
 import { buildDog } from "./dog.js";
 import { createAudio } from "./audio.js";
@@ -59,10 +59,10 @@ const VIEWS = {
   shelf:   { pos: [-0.35, 1.85, -0.55], target: [-2.8, 1.2, -2.45] },
   console: { pos: [1.68, 1.5, -1.2], target: [1.68, 0.66, -2.72] },
   board:   { pos: [-0.5, 1.8, 0.45], target: [-0.5, 1.75, -2.95] },
-  hobby:   { pos: [1.0, 1.45, -0.35], target: [2.6, 0.95, -1.5] }
+
 };
 // TV nie ma punktu interakcji - tylko wyswietla notowania
-const ORDER = ["desk", "wall", "board", "console", "shelf", "hobby"];
+const ORDER = ["desk", "wall", "board", "console", "shelf"];
 let R, hero, dog, pins = {}, focused = null, flight = null, savedHome = null, far = 1;
 const audio = createAudio();
 
@@ -160,21 +160,23 @@ function openPanel(key){
 }
 function closePanel(){ $("panel").classList.remove("open"); $("panel").setAttribute("aria-hidden", "true"); }
 
-// ---------- dzien / noc ----------
+// ---------- lampa przy kanapie (zawsze noc; wlaczona/zgaszona) ----------
+// off = pokoj oswietlaja tylko neony, LED-y i ekrany; on = cieple swiatlo lampy. Wypalone swiatlo przechodzi plynnie.
 const MODES = {
-  day:   { hemi: 1.9, sun: 3.4, sunColor: 0xfff1dc, fill: 1.2, lamp: 0.6, neon: 1.0, tv: 0.7, bloom: 0.4, exposure: 1.25, neonGlow: 1.3, glowK: 0.7 },
-  night: { hemi: 0.6, sun: 0.55, sunColor: 0x8fa6ff, fill: 0.4, lamp: 2.8, neon: 3.2, tv: 1.6, bloom: 0.75, exposure: 1.25, neonGlow: 2.0, glowK: 1.1 }
+  off: { hemi: 0.45, sun: 0.3, sunColor: 0x8fa6ff, fill: 0.3, lamp: 2.4, neon: 3.2, tv: 1.8, bloom: 0.85, exposure: 1.2, neonGlow: 2.2, glowK: 1.2 },
+  on:  { hemi: 0.95, sun: 0.6, sunColor: 0xffd9b0, fill: 0.7, lamp: 1.6, neon: 2.2, tv: 1.2, bloom: 0.6, exposure: 1.2, neonGlow: 1.7, glowK: 0.95 }
 };
-let night = false, modeK = 0, modeTarget = 0;
+let lampOn = true, modeK = 1, modeTarget = 1;
 const glowBase = new Map();
-function setNight(v){
-  night = v; modeTarget = v ? 1 : 0;
-  document.body.classList.toggle("night", v);
-  R.sky.mat.map = v ? R.sky.night : R.sky.day; R.sky.mat.needsUpdate = true;
-  $("btnMode").textContent = v ? "☾" : "☀"; $("btnMode").title = v ? T().night : T().day;
+function setLamp(v){
+  lampOn = v; modeTarget = v ? 1 : 0;
+  document.body.classList.add("night");
+  if(R.sky){ R.sky.mat.map = R.sky.night; R.sky.mat.needsUpdate = true; }
+  $("btnMode").classList.toggle("on", v);
+  $("btnMode").title = v ? T().lampOff : T().lampOn; $("btnMode").setAttribute("aria-label", $("btnMode").title);
 }
 function applyMode(){
-  const a = MODES.day, b = MODES.night, k = modeK, L = R.lights;
+  const a = MODES.off, b = MODES.on, k = modeK, L = R.lights;
   L.hemi.intensity = lerp(a.hemi, b.hemi, k); L.sun.intensity = lerp(a.sun, b.sun, k);
   L.sun.color.setHex(a.sunColor).lerp(new THREE.Color(b.sunColor), k);
   L.fill.intensity = lerp(a.fill, b.fill, k); L.lamp.intensity = lerp(a.lamp, b.lamp, k);
@@ -184,9 +186,27 @@ function applyMode(){
   const ng = lerp(a.neonGlow, b.neonGlow, k); R.neon.color.setRGB(ng, ng, ng);
   const gk = lerp(a.glowK, b.glowK, k);
   R.glowMats.forEach(function(m){ if(!glowBase.has(m)) glowBase.set(m, m.emissiveIntensity); m.emissiveIntensity = glowBase.get(m) * gk; });
-  if(R.bakedMat) R.bakedMat.uniforms.mixK.value = k;   // wypalone swiatlo: plynne przejscie dzien -> noc
+  if(R.bakedMat) R.bakedMat.uniforms.mixK.value = k;
+  if(R.lamp){ R.lamp.bulb.emissiveIntensity = 0.15 + 4 * k; R.lamp.light.intensity = 2.2 * k; }
 }
-
+// klikniecie w lampe w pokoju tez ja wlacza/gasi (bez reakcji na przeciaganie kamery)
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+let downAt = null;
+canvas.addEventListener("pointerdown", function(e){ downAt = [e.clientX, e.clientY]; });
+canvas.addEventListener("pointerup", function(e){
+  if(!downAt || !R || !R.lamp || focused) return;
+  const moved = Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]); downAt = null;
+  if(moved > 6) return;
+  ndc.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  if(ray.intersectObject(R.lamp.hit, false).length) setLamp(!lampOn);
+});
+canvas.addEventListener("pointermove", function(e){
+  if(!R || !R.lamp || e.buttons) return;
+  ndc.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  canvas.style.cursor = ray.intersectObject(R.lamp.hit, false).length ? "pointer" : "";
+});
 // ---------- jezyk i UI ----------
 function applyLang(){
   document.documentElement.lang = lang;
@@ -202,7 +222,7 @@ function applyLang(){
   if(focused) $("panelBody").innerHTML = panelHtml(focused);
 }
 $("btnLang").addEventListener("click", function(){ lang = lang === "pl" ? "en" : "pl"; try{ localStorage.setItem("cv-lang", lang); }catch(e){} applyLang(); });
-$("btnMode").addEventListener("click", function(){ setNight(!night); });
+$("btnMode").addEventListener("click", function(){ setLamp(!lampOn); });
 $("btnSound").addEventListener("click", function(){ const on = audio.toggle(); $("btnSound").classList.toggle("on", on); $("btnSound").textContent = on ? "🔊" : "🔈"; $("btnSound").title = on ? T().soundOn : T().soundOff; });
 $("panelClose").addEventListener("click", unfocus);
 window.addEventListener("keydown", function(e){
@@ -238,14 +258,16 @@ async function init(){
   }
   if(R.baked) bloom.threshold = 0.93;   // wypalony pokoj jest jasny - poswiata tylko dla neonow i LED-ow
   await step(45);
-  hero = buildCharacter(scene, R.seat);
+  // postac i pies z Blendera (gdy plik sie nie wczyta - wersje z kodu)
+  let actors = null;
+  if(R.baked){ try{ actors = (await loadModel("assets/room/actors.glb")).scene; }catch(e){ console.warn("Brak modeli postaci", e); } }
+  hero = buildCharacter(scene, R.seat, actors);
   await step(60);
-  dog = buildDog(scene, R.dog, hero);
+  dog = buildDog(scene, R.dog, hero, actors);
   await step(75);
   makePins();
   resize();
-  const h = new Date().getHours();
-  setNight(h >= 19 || h < 6); modeK = modeTarget; applyMode();
+  setLamp(true); modeK = modeTarget; applyMode();
   renderer.compile(scene, camera);
   await step(100);
   $("loader").classList.add("ready");
@@ -254,7 +276,7 @@ async function init(){
   // ?og=1 - tryb do zrobienia obrazka podgladu linku: od razu w pokoju, noc, bez interfejsu
   if(/[?&]og=1/.test(location.search)){
     document.body.classList.add("og"); $("loader").remove();
-    setNight(true); modeK = 1; applyMode(); frame(0.016);
+    setLamp(true); modeK = 1; applyMode(); frame(0.016);
   }
   requestAnimationFrame(loop);
 }
