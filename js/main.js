@@ -4,14 +4,14 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
-import { buildRoom } from "./room.js";
-import { buildBakedRoom, load as loadModel } from "./roomBaked.js";
-import { buildCharacter } from "./character.js";
-import { buildDog } from "./dog.js";
-import { createAudio } from "./audio.js";
-import { TEXT, PROFILE } from "./content.js";
-import { LOGOS } from "./screens.js";
-import { ease, lerp } from "./util.js";
+import { buildRoom } from "./room.js?v=20261018b";
+import { buildBakedRoom, load as loadModel } from "./roomBaked.js?v=20261018b";
+import { buildCharacter } from "./character.js?v=20261018b";
+import { buildDog } from "./dog.js?v=20261018b";
+import { createAudio } from "./audio.js?v=20261018b";
+import { TEXT, PROFILE } from "./content.js?v=20261018b";
+import { LOGOS } from "./screens.js?v=20261018b";
+import { ease, lerp } from "./util.js?v=20261018b";
 
 const $ = function(id){ return document.getElementById(id); };
 const touch = window.matchMedia("(pointer: coarse)").matches;
@@ -260,7 +260,7 @@ async function init(){
   await step(45);
   // postac i pies z Blendera (gdy plik sie nie wczyta - wersje z kodu)
   let actors = null;
-  if(R.baked){ try{ actors = (await loadModel("assets/room/actors.glb")).scene; }catch(e){ console.warn("Brak modeli postaci", e); } }
+  if(R.baked){ try{ actors = (await loadModel("assets/room/actors.glb?v=20261018b")).scene; }catch(e){ console.warn("Brak modeli postaci", e); } }
   hero = buildCharacter(scene, R.seat, actors);
   await step(60);
   dog = buildDog(scene, R.dog, hero, actors);

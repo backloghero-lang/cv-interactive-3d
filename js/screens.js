@@ -1,4 +1,4 @@
-import { canvasTexture, roundRect } from "./util.js";
+import { canvasTexture, roundRect } from "./util.js?v=20261018b";
 
 // ---------- wspolne ----------
 const FONT = "'Segoe UI', 'Inter', system-ui, sans-serif";

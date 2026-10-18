@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { C, mat, glow, rbox, box, cyl, sphere, capsule, group, canvasTexture, screenMesh, roundRect } from "./util.js";
-import * as S from "./screens.js";
+import { C, mat, glow, rbox, box, cyl, sphere, capsule, group, canvasTexture, screenMesh, roundRect } from "./util.js?v=20261018b";
+import * as S from "./screens.js?v=20261018b";
 
 // Uklad pokoju (metry): podloga 6x6 w (0,0,0); sciana tylna z = -3, sciana lewa x = -3.
 // Lewa sciana: regal z certyfikatami, biurko z monitorami + neon, sciana ze zdjeciami firm.

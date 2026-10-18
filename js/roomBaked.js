@@ -1,12 +1,12 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
-import { C, mat, glow, box, sphere, group, canvasTexture } from "./util.js";
-import * as S from "./screens.js";
+import { C, mat, glow, box, sphere, group, canvasTexture } from "./util.js?v=20261018b";
+import * as S from "./screens.js?v=20261018b";
 
 // Pokoj z Blendera: statyczna geometria z wypalonym oswietleniem (noc / dzien) + elementy dynamiczne dokladane tutaj
 // (ekrany, neon, LED-y, lampki, hologram). Interfejs zwracanego obiektu jest taki sam jak w room.js.
-const BASE = "assets/room/";
+const BASE = "assets/room/"; const V = "?v=20261018b";   // znacznik wersji: wymusza swieze pliki po publikacji
 
 export function load(url, onProgress){
   const draco = new DRACOLoader(); draco.setDecoderPath("vendor/addons/libs/draco/gltf/");
@@ -33,9 +33,9 @@ export async function buildBakedRoom(scene, opts){
   const R = { anim: [], screens: {}, anchors: {}, lights: {}, glowMats: [], dog: {}, seat: { x: -1.95, y: 0.54, z: -0.72 }, baked: true };
   const progress = opts.onProgress || function(){};
   const [gltf, props, lampOn, lampOff] = await Promise.all([
-    load(BASE + "room.glb", function(e){ if(e.total) progress(e.loaded / e.total); }),
-    load(BASE + "props.glb").catch(function(){ return null; }),
-    tex(BASE + "bake_on.jpg"), tex(BASE + "bake_off.jpg")
+    load(BASE + "room.glb" + V, function(e){ if(e.total) progress(e.loaded / e.total); }),
+    load(BASE + "props.glb" + V).catch(function(){ return null; }),
+    tex(BASE + "bake_on.jpg" + V), tex(BASE + "bake_off.jpg" + V)
   ]);
   const room = gltf.scene; scene.add(room);
   const named = {};
