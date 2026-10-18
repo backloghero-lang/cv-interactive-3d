@@ -5,7 +5,7 @@
 <h1 align="center">Dariusz Masłyk — interaktywne CV 3D</h1>
 <p align="center">Analityk biznesowo-systemowy · Aplikacje mobilne · Comarch ERP · Integracje · AI</p>
 
-<p align="center"><b>▶ <a href="https://backloghero-lang.github.io/">Wejdź do pokoju</a></b> · <a href="https://backloghero-lang.github.io/cv.html">wersja tekstowa</a></p>
+<p align="center"><b>▶ <a href="https://backloghero-lang.github.io/cv-interactive-3d/">Wejdź do pokoju</a></b> · <a href="https://backloghero-lang.github.io/cv-interactive-3d/cv.html">wersja tekstowa</a></p>
 
 <details>
 <summary><strong>🧭 Jak to działa</strong></summary>
