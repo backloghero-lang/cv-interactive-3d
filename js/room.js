@@ -146,7 +146,7 @@ export function buildRoom(scene, opts){
 
   // ---------- fotel gamingowy (miekki, oble ksztalty) ----------
   const chair = group(room, -1.95, 0, -0.72);
-  chair.rotation.y = -Math.PI / 2;    // oparcie od strony +x (postac patrzy w -x)
+  chair.rotation.y = Math.PI / 2;     // oparcie (lokalne +z) za plecami postaci, od strony +x; postac patrzy w -x
   cyl(0.035, 0.045, 0.36, mat(C.metal, { metalness: 0.6, roughness: 0.35 }), 0, 0.07, 0, chair);
   for(let i = 0; i < 5; i++){
     const a = i * 1.2566, leg = capsule(0.022, 0.24, mat(C.black), Math.sin(a) * 0.14, 0.06, Math.cos(a) * 0.14, chair, false);
