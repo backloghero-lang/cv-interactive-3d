@@ -13,6 +13,12 @@ function pivot(parent, x, y, z){ const g = new THREE.Group(); g.position.set(x |
 export function buildDog(scene, P, character){
   const tan = mat(0xc07a3a), white = mat(0xf4efe6), black = mat(0x24201d), ear = mat(0x7a4322), nose = mat(0x111111);
   const root = new THREE.Group(); scene.add(root);
+  // miekki cien pod psem (podloga z wypalonym swiatlem nie przyjmuje cieni czasu rzeczywistego)
+  const shC = document.createElement("canvas"); shC.width = shC.height = 64;
+  const sg = shC.getContext("2d").createRadialGradient(32, 32, 2, 32, 32, 32); sg.addColorStop(0, "rgba(0,0,0,.55)"); sg.addColorStop(1, "rgba(0,0,0,0)");
+  const sctx = shC.getContext("2d"); sctx.fillStyle = sg; sctx.fillRect(0, 0, 64, 64);
+  const blob = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.62), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(shC), transparent: true, depthWrite: false }));
+  blob.rotation.x = -Math.PI / 2; blob.position.y = 0.012; blob.renderOrder = 1; root.add(blob);
   const body = pivot(root, 0, 0, 0);
   part(0.18, 0.17, 0.42, tan, body, 0, 0.25, 0, 0.06);
   part(0.185, 0.07, 0.3, black, body, 0, 0.325, -0.02, 0.03);       // czarne siodlo

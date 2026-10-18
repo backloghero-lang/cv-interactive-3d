@@ -5,6 +5,7 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { buildRoom } from "./room.js";
+import { buildBakedRoom } from "./roomBaked.js";
 import { buildCharacter } from "./character.js";
 import { buildDog } from "./dog.js";
 import { createAudio } from "./audio.js";
@@ -183,6 +184,7 @@ function applyMode(){
   const ng = lerp(a.neonGlow, b.neonGlow, k); R.neon.color.setRGB(ng, ng, ng);
   const gk = lerp(a.glowK, b.glowK, k);
   R.glowMats.forEach(function(m){ if(!glowBase.has(m)) glowBase.set(m, m.emissiveIntensity); m.emissiveIntensity = glowBase.get(m) * gk; });
+  if(R.bakedMat) R.bakedMat.uniforms.mixK.value = k;   // wypalone swiatlo: plynne przejscie dzien -> noc
 }
 
 // ---------- jezyk i UI ----------
@@ -227,7 +229,14 @@ function step(pct){ $("loadBar").style.width = pct + "%"; return new Promise(fun
 async function init(){
   applyLang();
   await step(10);
-  R = buildRoom(scene, { getLang: function(){ return lang; }, lowPower: lowPower });
+  // pokoj z Blendera (wypalone swiatlo); gdy pliki sie nie wczytaja - pokoj budowany w kodzie
+  try{
+    R = await buildBakedRoom(scene, { getLang: function(){ return lang; }, onProgress: function(p){ $("loadBar").style.width = (10 + p * 35) + "%"; } });
+  }catch(e){
+    console.warn("Pokoj z Blendera niedostepny, uzywam wersji z kodu", e);
+    R = buildRoom(scene, { getLang: function(){ return lang; }, lowPower: lowPower });
+  }
+  if(R.baked) bloom.threshold = 0.93;   // wypalony pokoj jest jasny - poswiata tylko dla neonow i LED-ow
   await step(45);
   hero = buildCharacter(scene, R.seat);
   await step(60);
